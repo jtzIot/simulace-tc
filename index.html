@@ -110,11 +110,20 @@
     .review-panel input,.review-panel select,.review-number{background:#0f172a;color:#e2e8f0;border:1px solid #475569;border-radius:6px;padding:6px;max-width:100%}
     .review-number{width:90px;margin:5px 0}.review-actions{display:flex;gap:8px;flex-wrap:wrap}.review-actions button{border:1px solid #475569;padding:8px;border-radius:6px}
     .review-positive{color:#6ee7b7}.review-negative{color:#fda4af}.review-panel a{text-decoration:underline;color:#7dd3fc}
+
+    .energy-card{margin:0 0 18px;padding:0;overflow:hidden}.energy-card summary{padding:15px 18px;cursor:pointer;display:flex;gap:12px;align-items:center;justify-content:space-between;color:#e2e8f0;font-weight:650}
+    .energy-card summary:before{content:'▸';color:#7dd3fc}.energy-card[open] summary:before{content:'▾'}.energy-card summary #energy-summary{flex:1}.energy-hint{font-size:12px;color:#94a3b8;font-weight:400}
+    #energy-form{padding:0 18px 18px;border-top:1px solid #334155}.energy-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}.energy-grid h3{font-size:17px;font-weight:650;margin:15px 0 12px}
+    .energy-field{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;font-size:12px}.energy-field small{color:#94a3b8;white-space:nowrap}.energy-field input,.energy-field select{background:#0f172a;border:1px solid #475569;color:#e2e8f0;padding:7px;border-radius:6px;width:140px;max-width:50%}.energy-field select{width:210px}.energy-field input:disabled{opacity:.45}
+    .energy-check{display:flex;align-items:center;gap:9px;font-size:13px;margin:14px 0}.energy-check input{accent-color:#38bdf8}.energy-note{font-size:12px;color:#94a3b8;line-height:1.6;margin:10px 0}.energy-note a{color:#7dd3fc;text-decoration:underline}.energy-result{padding:12px;background:#0c2435;border-radius:8px;font-size:13px;line-height:1.7;color:#bae6fd;margin:14px 0}
+    .energy-footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px;font-size:12px;color:#94a3b8}.energy-footer span{flex:1}.energy-footer button{padding:8px 12px;border:1px solid #475569;border-radius:6px;color:#e2e8f0}
+    @media(max-width:700px){.energy-grid{grid-template-columns:1fr;gap:8px}.energy-hint{display:none}.energy-field{gap:8px}}
   </style>
 </head>
 <body class="bg-[#060913] text-slate-100 px-3 sm:px-6 lg:px-8 py-3 sm:py-5 w-full min-h-screen flex flex-col">
 
   <!-- Header with Location, Geocoding & Controls -->
+  <section id="gas-overview" class="card mb-4" aria-label="Srovnání TČ a plynu"></section>
   <header class="mb-4">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
       <div>
@@ -149,17 +158,10 @@
           </div>
         </div>
 
-        <button
-          onclick="downloadLocationWeather()"
-          id="btn-download-weather"
-          title="Stáhnout nová historická meteorologická data pro tuto lokalitu"
-          class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition flex items-center gap-1.5 shadow"
-        >
-          <span>📥 Stáhnout data polohy</span>
-        </button>
 
         <button
           onclick="toggleSettingsDrawer()"
+          id="btn-settings-drawer" aria-expanded="false" aria-controls="settings-drawer"
           class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5"
         >
           <span>⚙️ Nastavení domu</span>
@@ -170,13 +172,13 @@
     <!-- Active Location Badges Bar -->
     <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5 text-xs text-slate-400">
       <div class="flex flex-wrap items-center gap-2">
-        <span id="badge-location" class="font-semibold text-sky-400 flex items-center gap-1">📍 Plzeňský kraj</span>
+        <span id="badge-location" class="font-semibold text-sky-400 flex items-center gap-1">📍 Modelová lokalita – západní Čechy</span>
         <span id="badge-altitude" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">⛰️ 392 m n. m.</span>
         <span id="badge-te-design" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">Výpočtová teplota t_e: -12 °C</span>
         <span id="badge-keymark" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold">Keymark: 011-1W1163 (8,1 kW)</span>
       </div>
       <div id="badge-weather-source" class="text-[11px] text-slate-500">
-        Meteorologická data: Archiv Open-Meteo ERA5 (Plzeňský kraj, 392 m n. m.)
+        Meteorologická data: Referenční archiv Open-Meteo ERA5 pro západní Čechy; modelový dům
       </div>
     </div>
 
@@ -193,15 +195,22 @@
     </div>
 
     <!-- Collapsible Settings Drawer -->
-    <div id="settings-drawer" class="card p-4 md:p-5 mt-3 border-sky-500/40 bg-slate-900/95 shadow-xl transition-all">
+    <div id="settings-drawer" class="hidden card p-4 md:p-5 mt-3 border-sky-500/40 bg-slate-900/95 shadow-xl transition-all">
       <div class="flex items-center justify-between border-b border-slate-700 pb-2 mb-3">
         <h3 class="text-sm font-semibold text-white flex items-center gap-2">
           <span>🎛️ Parametry domu, otopné soustavy a TUV (okamžitý přepočet simulace)</span>
         </h3>
         <button onclick="resetDefaultParameters()" class="text-xs text-sky-400 hover:text-sky-300 underline font-medium">
-          Obnovit výchozí hodnoty z projektu
+          Obnovit modelové hodnoty
         </button>
       </div>
+
+      <div id="settings-live-costs" class="card mb-3" style="position:sticky;top:8px;z-index:30;background:#0f172a;border:1px solid #38bdf8;padding:12px" aria-live="polite"></div>
+      <details id="hp-settings-details" class="mb-4 p-3 rounded-lg bg-slate-800/60 border border-slate-700"><summary class="cursor-pointer font-semibold text-white">Tepelné čerpadlo · výběr a úprava parametrů</summary>
+        <label for="settings-hp-select" class="block font-semibold text-white mb-2">Tepelné čerpadlo</label>
+        <select id="settings-hp-select" class="w-full p-2 rounded bg-slate-900 border border-slate-600 text-white" onchange="selectKeymarkModel(this.value)"></select>
+        <div id="settings-hp-parameters" class="mt-3"></div>
+      </details>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 text-xs">
 
@@ -300,14 +309,14 @@
           <div>
             <div class="flex justify-between font-medium text-slate-300">
               <span>Cílová teplota & tolerance:</span>
-              <span id="val-tin" class="text-amber-400 font-bold">22.0 ± 1.0 °C</span>
+              <span id="val-tin" class="text-amber-400 font-bold">22.0 − 1.0 °C</span>
             </div>
             <div class="grid grid-cols-2 gap-2 mt-1">
               <input type="range" id="input-tin" min="19.0" max="23.5" step="0.5" value="22.0" oninput="onParamChange()" title="Cílová teplota">
-              <input type="range" id="input-tolerance" min="0.2" max="2.0" step="0.1" value="1.0" oninput="onParamChange()" title="Tolerance">
+              <input type="range" id="input-tolerance" min="0" max="3" step="0.1" value="1.0" oninput="onParamChange()" title="Tolerance">
             </div>
             <div class="flex justify-between text-[10px] text-slate-400">
-              <span id="calc-room-corridor">Pásmo: 21,0 – 23,0 °C</span>
+              <span id="calc-room-corridor">Pásmo: 21,0 – 22,0 °C</span>
               <span id="calc-room-storage" class="text-amber-400 font-semibold">Aku: 11 kWh</span>
             </div>
           </div>
@@ -370,12 +379,12 @@
             <div class="text-[10px] text-slate-400">Adiabatická korekce (0,65 °C / 100 m)</div>
           </div>
 
-          <div>
+          <div hidden>
             <div class="flex justify-between font-medium text-slate-300">
               <span>Cena elektřiny:</span>
               <span id="val-price" class="text-rose-400 font-bold">6.00 Kč/kWh</span>
             </div>
-            <input type="range" id="input-price" min="2.5" max="8.5" step="0.10" value="6.0" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-price" min="0" max="1000" step="0.00001" value="6.0" oninput="onParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Včetně distribuce, POZE, daně a DPH</div>
           </div>
 
@@ -391,23 +400,16 @@
 
         <!-- 6. Gas Condensing Boiler & EU ETS 2 Allowance -->
         <div class="space-y-3 p-3 rounded-lg bg-slate-800/60 border border-slate-700">
-          <div>
+          <div hidden>
             <div class="flex justify-between font-medium text-slate-300">
               <span>Cena plynu:</span>
               <span id="val-gas-price" class="text-amber-400 font-bold">1.60 Kč/kWh</span>
             </div>
-            <input type="range" id="input-gas-price" min="1.0" max="3.0" step="0.05" value="1.60" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-gas-price" min="0" max="1000" step="0.00001" value="1.60" oninput="onParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Včetně komodity, distribuce a DPH</div>
           </div>
 
-          <div>
-            <div class="flex justify-between font-medium text-slate-300">
-              <span>Cena povolenky (EU ETS 2):</span>
-              <span id="val-co2-price" class="text-rose-400 font-bold">60 €/t CO₂</span>
-            </div>
-            <input type="range" id="input-co2-price" min="0" max="150" step="5" value="60" oninput="onParamChange()" class="w-full mt-1">
-            <div id="calc-ets2-surcharge" class="text-[10px] text-rose-300">Příplatek k plynu: +0,33 Kč/kWh (celkem 1,93 Kč/kWh s DPH)</div>
-          </div>
+
 
           <div>
             <div class="flex justify-between font-medium text-slate-300">
@@ -432,53 +434,26 @@
     </div>
   </header>
 
-  <!-- Interactive Parameter Summary Cards (Matching Screenshot) -->
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3.5">
-    <div class="card p-3 cursor-pointer hover:border-sky-500/60 transition" onclick="toggleSettingsDrawer()">
-      <div class="text-[11px] font-medium text-slate-400 uppercase">Tepelná ztráta domu</div>
-      <div id="card-qloss-display" class="text-lg font-bold text-white mt-0.5">5,80 kW</div>
-      <div id="card-qloss-sub" class="text-[11px] text-slate-400">při -12 °C (H = 171 W/K)</div>
-    </div>
-    <div class="card p-3 cursor-pointer hover:border-sky-500/60 transition" onclick="toggleSettingsDrawer()">
-      <div class="text-[11px] font-medium text-slate-400 uppercase">Otopná voda (topná křivka)</div>
-      <div id="card-tflow-display" class="text-lg font-bold text-sky-400 mt-0.5">28,0 °C</div>
-      <div id="card-tflow-sub" class="text-[11px] text-slate-400">topná křivka (vinyl)</div>
-    </div>
-    <div class="card p-3 cursor-pointer hover:border-amber-500/60 transition" onclick="toggleSettingsDrawer()">
-      <div class="text-[11px] font-medium text-slate-400 uppercase">Akumulace podlahy</div>
-      <div id="card-material-display" class="text-lg font-bold text-amber-400 mt-0.5">20,0 tun</div>
-      <div id="card-material-sub" class="text-[11px] text-slate-400">50 mm beton (5,7 kWh/K)</div>
-    </div>
-    <div class="card p-3 cursor-pointer hover:border-emerald-500/60 transition" onclick="toggleSettingsDrawer()">
-      <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 uppercase">
-        <span>Koridor & Ohřev TUV</span>
-        <span class="text-emerald-400 font-bold hover:underline">Nastavit ▾</span>
-      </div>
-      <div id="card-tolerance-display" class="text-lg font-bold text-emerald-400 mt-0.5">± 1,0 °C</div>
-      <div id="card-tolerance-sub" class="text-[10px] text-slate-400">koridor 21,0 – 23,0 °C</div>
-      <div id="card-dhw-sub" class="text-[11px] text-slate-200 truncate mt-0.5">🚿 TUV: 120 l/den (55 °C • polední)</div>
-    </div>
-    <div class="card p-3 cursor-pointer hover:border-emerald-500/60 transition" onclick="openKeymarkModal()">
-      <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 uppercase">
-        <span>Zvolené TČ (Keymark)</span>
-        <span class="text-emerald-400 font-bold hover:underline">Změnit ▾</span>
-      </div>
-      <div id="spec-hp-name" class="text-sm font-bold text-emerald-400 mt-1 truncate">Gawliczek HM-M0-A2</div>
-      <div id="spec-hp-mod" class="text-[11px] text-slate-300 truncate">Keymark: 011-1W1163 • 8,1 kW</div>
-    </div>
-    <div class="card p-3">
-      <div class="text-[11px] font-medium text-slate-400 uppercase">Parametry TČ & Hluk</div>
-      <div id="spec-hp-params" class="text-sm font-bold text-emerald-400 mt-1">SCOP 4,62 • R290</div>
-      <div id="spec-hp-noise" class="text-[11px] text-slate-400">Hluk: ~35-38 dB(A)</div>
-    </div>
-  </div>
+  <details id="energy-card" class="card energy-card">
+    <summary aria-label="Nastavení cen energií"><span id="energy-summary">D02d · načítání ceny…</span><span class="energy-hint">Nastavení energií</span></summary>
+    <div id="energy-form"></div>
+<div class="px-5 pb-5">          <div>
+            <div class="flex justify-between font-medium text-slate-300">
+              <span>Cena povolenky (EU ETS 2):</span>
+              <span id="val-co2-price" class="text-rose-400 font-bold">30 €/t CO₂</span>
+            </div>
+            <input type="range" id="input-co2-price" min="0" max="150" step="5" value="30" oninput="onParamChange()" class="w-full mt-1">
+            <div id="calc-ets2-surcharge" class="text-[10px] text-rose-300">Příplatek k plynu: +0,33 Kč/kWh (celkem 1,93 Kč/kWh s DPH)</div>
+          </div>
+</div>
+  </details>
 
   <!-- Prominent Explanation of Savings (Requested by User) -->
   <div class="card p-3.5 bg-gradient-to-r from-emerald-950/60 via-slate-900 to-sky-950/50 border border-emerald-500/35 flex items-start sm:items-center gap-3 mb-4 rounded-xl shadow-lg">
     <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg flex-shrink-0 shadow-inner">💡</div>
     <div class="text-xs text-slate-300 leading-relaxed">
       <span class="font-bold text-white">Proč vzniká úspora optimalizovaného řízení?</span>
-      Úspora může vznikat <span class="text-emerald-300 font-semibold">cílením na nejvyšší denní venkovní teplotu a nejvyšší COP čerpadla</span> — nabíjení tepelné akumulace do masivní podlahy a předehřev TUV probíhají v nejteplejších odpoledních hodinách (10:00–16:00). V noci se čerpadlo utlumuje nebo vypíná a dům čerpá akumulované teplo z podlahy, což může omezit provoz v chladných hodinách. Vyšší teplota vody a změna komfortu však mohou přínos snížit nebo obrátit.
+      Úspora může vznikat <span class="text-emerald-300 font-semibold">přesunem topení do teplejší části dne pro vyšší COP čerpadla</span> — nabíjení tepelné akumulace do masivní podlahy a předehřev TUV se upřednostňují v denním okně 10:00–16:00; ohřev TUV respektuje jeho vlastní nastavení. V noci se čerpadlo utlumuje nebo vypíná a dům čerpá akumulované teplo z podlahy, což může omezit provoz v chladných hodinách. Vyšší teplota vody a změna komfortu však mohou přínos snížit nebo obrátit.
     </div>
   </div>
 
@@ -487,84 +462,20 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-base text-sky-400">🎛️</span>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Úroveň automatizace řízení TČ:</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-white">Režim řízení TČ:</h3>
         <span id="badge-auto-level" class="px-2.5 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
-          Úroveň C: Prediktivní Smart Home (ideální výhled)
+          Optimalizace · denní topení
         </span>
       </div>
       <div class="text-[11px] text-slate-400">
-        Klikněte na úroveň pro simulaci chování a okamžité přepočtení sezóny i 24h profilu:
+        Denní optimalizace s poklesem teploty pouze pod nastavený cíl:
       </div>
     </div>
 
-    <!-- 4 Switchable Strategy Buttons -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-      <!-- Level 0: Baseline -->
-      <button id="btn-auto-baseline" onclick="setAutomationLevel('baseline')" class="auto-level-btn p-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 transition text-left flex flex-col justify-between cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-xs text-slate-200">0. Běžný 24h ekviterm</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 font-semibold">Základ</span>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1 leading-snug">
-            Stálý teplotní cíl, stejná tepelná kapacita domu. TUV ráno a večer. Referenční model pro ostatní režimy.
-          </p>
-        </div>
-        <div class="text-[11px] text-slate-400 font-medium mt-2 pt-1.5 border-t border-slate-700/60 flex justify-between">
-          <span>Výsledek zvolené sezóny se dopočítá…</span>
-          <span></span>
-        </div>
-      </button>
-
-      <!-- Level A: Timer -->
-      <button id="btn-auto-timer" onclick="setAutomationLevel('timer')" class="auto-level-btn p-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 transition text-left flex flex-col justify-between cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-xs text-sky-300">A. Časovač v regulátoru</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-950 text-sky-400 border border-sky-800/50 font-semibold">Týdenní plán</span>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1 leading-snug">
-            Pevný časový rozvrh přímo v menu TČ: 10–16h nabíjení desky, 22–06h noční útlum, 13–14h TUV.
-          </p>
-        </div>
-        <div class="text-[11px] text-sky-400 font-medium mt-2 pt-1.5 border-t border-slate-700/60 flex justify-between">
-          <span>Výsledek zvolené sezóny se dopočítá…</span>
-          <span></span>
-        </div>
-      </button>
-
-      <!-- Level B: SG Ready -->
-      <button id="btn-auto-sgready" onclick="setAutomationLevel('sgready')" class="auto-level-btn p-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 transition text-left flex flex-col justify-between cursor-pointer">
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-xs text-amber-300">B. SG Ready / FVE relé</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800/50 font-semibold">HW kontakt</span>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1 leading-snug">
-            Spínání poledního boostu (Stav 3) a bojleru podle denního maxima venkovní teploty a slunečního svitu.
-          </p>
-        </div>
-        <div class="text-[11px] text-amber-400 font-medium mt-2 pt-1.5 border-t border-slate-700/60 flex justify-between">
-          <span>Výsledek zvolené sezóny se dopočítá…</span>
-          <span></span>
-        </div>
-      </button>
-
-      <!-- Level C: Predictive -->
-      <button id="btn-auto-predictive" onclick="setAutomationLevel('predictive')" class="auto-level-btn active p-3 rounded-lg border border-purple-500/80 bg-purple-950/40 text-left flex flex-col justify-between cursor-pointer shadow-lg">
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-xs text-purple-300">C. Prediktivní Smart Home</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/30 text-purple-200 border border-purple-400/40 font-bold">Loxone / HA</span>
-          </div>
-          <p class="text-[11px] text-slate-300 mt-1 leading-snug">
-            Pravidlové řízení s ideální znalostí až 18 h budoucí historické teploty. Komfort a úsporu ověřuje simulace.
-          </p>
-        </div>
-        <div class="text-[11px] text-purple-300 font-bold mt-2 pt-1.5 border-t border-purple-800/60 flex justify-between">
-          <span>Výsledek zvolené sezóny se dopočítá…</span>
-          <span></span>
-        </div>
+    <div class="grid grid-cols-1 gap-2.5">
+      <button id="btn-auto-optimized" aria-pressed="true" onclick="setAutomationLevel('optimized')" class="auto-level-btn active p-3 rounded-lg border border-sky-400 bg-sky-950/60 text-left">
+        <div><h3 class="font-bold text-white">Optimalizace · denní topení</h3><p class="text-xs text-slate-300">Přednostně topí 10–16 h, kdy bývá venku tepleji a COP vyšší. Mimo toto okno využívá akumulaci a podle potřeby dotápí. TUV podle nastavení.</p></div>
+        <div class="text-xs text-sky-300 mt-2">Přepočítávám…</div>
       </button>
     </div>
   </div>
@@ -618,37 +529,6 @@
     </div>
   </div>
 
-
-  <section class="card review-panel" aria-label="Vyhodnocení simulace">
-    <h2>Výsledek a jeho podmínky</h2>
-    <p id="decision-review" role="status"></p>
-    <p id="weather-review"></p>
-    <p>Karty výsledků i volby řízení ukazují <b>vybranou sezónu</b>. Ekonomika a citlivost uvádějí průměr vybraného období.</p>
-    <div id="comfort-review"></div>
-    <details><summary>Ekonomické předpoklady a citlivost</summary>
-      <div class="review-controls">
-        <label>Období <select id="review-economyPeriod" onchange="changeEconomy('economyPeriod',this.value)"><option value="season">Topná sezóna říjen–duben</option><option value="annual">Celý rok včetně odhadu letní TUV</option></select></label>
-        <label><input id="review-etsEnabled" type="checkbox" onchange="changeEconomy('etsEnabled',this.checked)"> Zahrnout scénář ETS 2 (cena v nastavení)</label>
-        <label>Paušál plynu Kč/měsíc <input id="review-gasMonthlyFixed" type="number" min="0" max="5000" value="135" onchange="changeEconomy('gasMonthlyFixed',this.value)"></label>
-        <label>Navýšení paušálu elektřiny Kč/měsíc <input id="review-elMonthlyExtra" type="number" min="0" max="5000" value="0" onchange="changeEconomy('elMonthlyExtra',this.value)"></label>
-        <label><input id="review-retainGas" type="checkbox" onchange="changeEconomy('retainGas',this.checked)"> U TČ zůstává přípojka plynu (paušál se dál platí)</label>
-        <label>Odhad COP letní TUV <input id="review-summerDhwCop" type="number" min="1" max="7" step="0.1" value="2.7" onchange="changeEconomy('summerDhwCop',this.value)"></label>
-      </div>
-      <div id="sensitivity-review"></div>
-    </details>
-    <details><summary>Scénáře A/B, export a sdílení</summary>
-      <div class="review-actions"><button onclick="saveScenario('A')">Uložit A</button><button onclick="restoreScenario('A')">Načíst A</button><button onclick="saveScenario('B')">Uložit B</button><button onclick="restoreScenario('B')">Načíst B</button><button onclick="exportScenario()">Export JSON</button><button onclick="shareScenario()">Kopírovat odkaz</button><label>Import JSON <input id="scenario-file" type="file" accept=".json,application/json"></label></div>
-      <p id="scenario-status" role="status"></p><input id="scenario-link" aria-label="Odkaz na scénář" readonly hidden style="width:100%"><div id="scenario-comparison"></div>
-    </details>
-    <details><summary>Jak se počítá · zdroje a omezení</summary>
-      <p>Model v3 používá stejný dům a 10minutovou energetickou bilanci pro všechny čtyři regulátory. Teplota se neořezává na komfortní pásmo. Před sezónou proběhne sedmidenní rozběh s počasím prvního týdne; starty a spotřeba rozběhu se do výsledku nezahrnují. Sepnutí jsou přechody vypnuto → zapnuto při rozlišení 10 minut, nikoli předpověď skutečného cyklování konkrétní jednotky.</p>
-      <p>Bilance: Cᵣ ΔTᵣ = (G(Tf−Tr) + zisky − H(Tr−Te)) Δt; Cf ΔTf = (teplo TČ + patrona − G(Tf−Tr)) Δt. Oba uzly používají tentýž přenos tepla. Patronu omezuje 3 kW. Při radiátorech je teplo dodáváno přímo do místnosti a akumulace podlahy je vypnuta. Podlahový model používá zjednodušený přestup a limit střední teploty desky 29 °C; neřeší samostatně povrch krytiny.</p>
-      <p>Prediktivní režim je pravidlové řízení s ideální znalostí až 18 hodin budoucí historické teploty, nikoli optimalizační MPC ani test skutečné předpovědi. SG Ready používá solární zisky jako signál; výroba FVE, baterie, HDO a hodinové ceny nejsou simulovány. Úspora není zaručena.</p>
-      <p>Hodinové počasí a odhad solárních zisků pocházejí z vloženého archivu <a href="https://open-meteo.com/en/docs/historical-weather-api" target="_blank" rel="noopener">Open-Meteo</a>. Změna výšky se vztahuje k výšce načteného archivu. Zisky ze slunce jsou agregovaný odhad bez detailní geometrie oken.</p>
-      <p>Katalog obsahuje deklarované hodnoty s čísly <a href="https://www.heatpumpkeymark.com/" target="_blank" rel="noopener">Heat Pump KEYMARK</a>. Jednotlivé hodnoty v katalogu nebyly touto úpravou znovu ověřeny proti protokolům. COP mezi body se interpoluje; korekce vody, odmrazování a dostupného výkonu jsou modelové odhady. TUV používá odvozený COP, nikoli přímo certifikovaný test EN 16147. TUV má v hodině přednost, zbytek kapacity slouží vytápění. Neřeší se odběrové špičky zásobníku. Oběhové čerpadlo vytápění má 25 W při provozu.</p>
-      <p>Hluk v katalogu je orientační údaj bez sjednocené metriky. Akustický výkon LWA nelze porovnávat s tlakem LpA bez uvedení vzdálenosti a podmínek. Celoroční ekonomika doplňuje pouze letní TUV z nastaveného COP. Paušály a servis jsou v sezónním pohledu poměrné; skutečná faktura se může lišit. Servisní náklady jsou uživatelský scénář, nikoli výklad povinností.</p>
-    </details>
-  </section>
 
   <!-- KPI Cards for Current Selection -->
   <div id="season-kpi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-5">
@@ -1613,7 +1493,7 @@
       currentSeason: '2022-2023',
       hoverSeason: null,
       selectedDayIndex: 98,       // Selected day for 24-hour diurnal profile (default coldest day)
-      automationLevel: 'predictive', // 'baseline' (0), 'timer' (A), 'sgready' (B), 'predictive' (C)
+      automationLevel: 'optimized', // baseline or optimized
 
       // Active Keymark Model & System Type
       activeModelId: 'gawliczek-81',
@@ -1633,9 +1513,9 @@
       singleMetric: 'el',         // 'el', 'scop', 'temp'
 
       // Location & Weather Source:
-      locationName: 'Plzeňský kraj',
-      lat: 49.73,
-      lon: 13.46,
+      locationName: 'Modelová lokalita – západní Čechy',
+      lat: null,
+      lon: null,
       altitude: 392,              // m n.m.
       tExtDesign: -12.0,          // °C
       isCustomWeatherLoaded: false,
@@ -1643,7 +1523,7 @@
       // Configurable Thermal Parameters:
       qLossDesign: 5.80,          // kW
       tInTarget: 22.0,            // °C
-      tTolerance: 1.0,            // °C (koridor 21.0 - 23.0 °C, aku dle kapacity desky)
+      tTolerance: 1.0,            // °C (koridor 21.0 - 22.0 °C, aku dle kapacity desky)
       tFlowDesign: 28.0,          // °C (výstupní teplota otopné vody při t_e_design)
       floorCovering: 'vinyl',     // 'dlazba', 'vinyl', 'drevo'
       floorMaterial: 'beton',     // 'beton' or 'anhydrit'
@@ -1660,7 +1540,7 @@
 
       // Natural Gas Boiler Comparison:
       gasPrice: 1.60,             // Kč/kWh s DPH
-      co2AllowancePriceEur: 60,   // €/t CO2
+      co2AllowancePriceEur: 30,   // €/t CO2
       gasBoilerEfficiency: 94,    // %
       gasBoilerServiceYearly: 1500// Kč/rok
     };
@@ -1830,6 +1710,7 @@
     }
 
     async function downloadLocationWeather() {
+      if (!Number.isFinite(state.lat) || !Number.isFinite(state.lon)) { alert("Nejprve vyberte obec ve vyhledávání."); return; }
       const bar = document.getElementById('fetch-status-bar');
       const text = document.getElementById('fetch-status-text');
       const badge = document.getElementById('fetch-status-badge');
@@ -1952,8 +1833,8 @@
     }
 
     // ================= DYNAMIC SIMULATION ENGINE =================
-// Shared 10-minute energy balance for all four controllers. Weather is hourly.
-const controllerLevels = ['baseline', 'timer', 'sgready', 'predictive'];
+// Shared 10-minute energy balance for both controllers. Weather is hourly.
+const controllerLevels = ['baseline', 'optimized'];
 let controllerResults = {};
 const bounded = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 function simulateController(weather, level) {
@@ -1962,7 +1843,7 @@ function simulateController(weather, level) {
   const Cf = state.floorAreaM2 * state.floorThicknessMm / 1000 * (concrete ? 2350 * 1020 : 2150 * 1000) / 3600000;
   const Cr = 9.5 * area, G = (concrete ? 1.68 : 1.85) * area;
   const H = state.qLossDesign / (state.tInTarget - state.tExtDesign);
-  const low = state.tInTarget - state.tTolerance, high = state.tInTarget + state.tTolerance;
+  const low = state.tInTarget - state.tTolerance, high = state.tInTarget;
   const radiator = state.heatingSystem === 'radiator';
   const correction = -0.0065 * (state.altitude - (state.weatherBaseAltitude ?? 392));
   const temps = weather.t.map(t => t + correction);
@@ -1988,19 +1869,13 @@ function simulateController(weather, level) {
     // DHW priority occupies a fraction of compressor time in this hour.
     const share = cap > 0 ? dhwHp / cap : 0;
     let charge = false, discharge = false;
-    if (level !== 'baseline' && !radiator) {
+    // Daytime priority: charge at 10–16 h; use stored heat otherwise.
+    // Heating remains available outside the window to protect comfort.
+    if (level === 'optimized') {
       charge = h >= 10 && h < 16;
-      discharge = h >= 22 || h < 6;
-      if (level === 'sgready') charge = charge && (weather.sol[ix] >= 0.05 || (h >= 11 && h < 14));
-      if (level === 'predictive') {
-        let count = 0, future = 0;
-        for (let j = ix; j < Math.min(temps.length, ix + 18); j++) { future += temps[j]; count++; }
-        future /= count;
-        charge = charge || te > future + 0.8;
-        discharge = discharge && te < future;
-      }
+      discharge = !charge;
     }
-    const target = state.tInTarget + (charge ? 0.65 : discharge ? -0.65 : 0) * state.tTolerance;
+    const target = state.tInTarget - (discharge ? 0.65 : 0) * state.tTolerance;
     let qHour = 0, eHour = 0, bkHour = 0, waterHour = 0, runHour = dhwHp > 0;
     if (i === 0) initialEnergy = Cf * tf + Cr * tr;
     for (let step = 0; step < 6; step++) {
@@ -2036,7 +1911,7 @@ function simulateController(weather, level) {
     }
     if (i < 0) continue;
     heat += qHour; e += eHour; de += dhwEl; dq += qdhw; backup += bkHour; dhwBackup += dhwBk; dhwUnmet += requestedDhw - qdhw;
-    hours.push({h, te, tr, tf, tfl: waterHour, q_hp: qHour, q_dhw: qdhw,
+    hours.push({h, te, tr, tf, controlTarget: target, tfl: waterHour, q_hp: qHour, q_dhw: qdhw,
       p_el_opt: eHour + dhwEl, cop_opt: eHour + dhwEl > 0 ? (qHour + qdhw) / (eHour + dhwEl) : 0,
       isRunning: runHour, isCharge: charge, isDischarge: discharge,
       heatEl: eHour, dhwEl, backup: bkHour, dhwBackup: dhwBk});
@@ -2252,17 +2127,17 @@ function recalculateSimulation() {
       const vol = state.floorAreaM2 * (state.floorThicknessMm / 1000.0);
       const massTons = (vol * rho) / 1000.0;
       const cKwhK = (vol * rho * c_spec) / 3600000.0;
-      const storageKwh = cKwhK * (state.tTolerance * 2.0);
+      const storageKwh = cKwhK * state.tTolerance;
 
       const tMinRoom = (state.tInTarget - state.tTolerance).toFixed(1).replace('.', ',');
-      const tMaxRoom = (state.tInTarget + state.tTolerance).toFixed(1).replace('.', ',');
+      const tMaxRoom = (state.tInTarget).toFixed(1).replace('.', ',');
 
       // Update Live UI Labels:
       document.getElementById('val-qloss').innerText = `${state.qLossDesign.toFixed(2)} kW`;
       document.getElementById('val-tflow').innerText = `${state.tFlowDesign.toFixed(1)} °C`;
       if (document.getElementById('val-area')) document.getElementById('val-area').innerText = `${state.floorAreaM2} m²`;
       document.getElementById('val-thickness').innerText = `${state.floorThicknessMm} mm`;
-      document.getElementById('val-tin').innerText = `${state.tInTarget.toFixed(1)} ± ${state.tTolerance.toFixed(1)} °C`;
+      document.getElementById('val-tin').innerText = `${state.tInTarget.toFixed(1)} − ${state.tTolerance.toFixed(1)} °C`;
       document.getElementById('val-price').innerText = `${state.electricityPrice.toFixed(2)} Kč/kWh`;
       if (document.getElementById('val-hp-service')) document.getElementById('val-hp-service').innerText = `${state.hpServiceYearly.toLocaleString('cs-CZ')} Kč/rok`;
 
@@ -2292,22 +2167,13 @@ function recalculateSimulation() {
       document.getElementById('calc-room-storage').innerText = `Aku: ${Math.round(storageKwh)} kWh`;
 
       // Summary Cards:
-      document.getElementById('card-qloss-display').innerText = `${state.qLossDesign.toFixed(2).replace('.', ',')} kW`;
       const h_w_k = Math.round((state.qLossDesign / (state.tInTarget - state.tExtDesign)) * 1000);
-      document.getElementById('card-qloss-sub').innerText = `při ${state.tExtDesign.toFixed(0)} °C (H = ${h_w_k} W/K)`;
 
-      document.getElementById('card-tflow-display').innerText = `${state.tFlowDesign.toFixed(1).replace('.', ',')} °C`;
-      document.getElementById('card-tflow-sub').innerText = `topná křivka (${state.floorCovering})`;
 
-      document.getElementById('card-material-display').innerText = `${massTons.toFixed(1).replace('.', ',')} tun`;
-      document.getElementById('card-material-sub').innerText = `${state.floorThicknessMm} mm ${state.floorMaterial} (${cKwhK.toFixed(1).replace('.', ',')} kWh/K)`;
 
-      document.getElementById('card-tolerance-display').innerText = `± ${state.tTolerance.toFixed(1).replace('.', ',')} °C`;
-      document.getElementById('card-tolerance-sub').innerText = `koridor ${tMinRoom} – ${tMaxRoom} °C`;
 
       const dhwPersons = Math.max(1, Math.round(state.dhwDailyLiters / 40));
       const dhwStatus = state.dhwEnabled ? `🚿 TUV: ${state.dhwDailyLiters} l/den (${state.dhwTargetTemp.toFixed(0)} °C • ${state.dhwMode === 'smart' ? 'polední' : 'průběžný'})` : '🚿 TUV: VYP';
-      document.getElementById('card-dhw-sub').innerText = dhwStatus;
 
       recalculateSimulation();
       updateUI();
@@ -2366,7 +2232,7 @@ function recalculateSimulation() {
       document.getElementById('input-dhw-temp').value = 55;
 
       document.getElementById('input-gas-price').value = 1.60;
-      document.getElementById('input-co2-price').value = 60;
+      document.getElementById('input-co2-price').value = 30;
       document.getElementById('input-gas-service').value = 1500;
       document.getElementById('input-gas-eff').value = 94;
       document.getElementById('input-hp-service').value = 0;
@@ -2383,6 +2249,7 @@ function recalculateSimulation() {
     function toggleSettingsDrawer() {
       const drawer = document.getElementById('settings-drawer');
       drawer.classList.toggle('hidden');
+      document.getElementById('btn-settings-drawer').setAttribute('aria-expanded', String(!drawer.classList.contains('hidden')));
     }
 
     function toggleSection(mode, forceState) {
@@ -2473,37 +2340,16 @@ function recalculateSimulation() {
       drawSingleSeasonChart();
     }
 
-        function setAutomationLevel(level) {
+    function setAutomationLevel(level) {
+      if (level !== 'optimized') return;
       state.automationLevel = level;
-      const levels = ['baseline', 'timer', 'sgready', 'predictive'];
-      levels.forEach(l => {
-        const btn = document.getElementById(`btn-auto-${l}`);
-        if (btn) {
-          if (l === level) {
-            btn.className = "auto-level-btn active p-3 rounded-lg border border-sky-400 bg-sky-950/60 text-left flex flex-col justify-between cursor-pointer shadow-lg transition";
-          } else {
-            btn.className = "auto-level-btn p-3 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-750 transition text-left flex flex-col justify-between cursor-pointer";
-          }
-        }
+      controllerLevels.forEach(l => {
+        const btn = document.getElementById('btn-auto-' + l);
+        if (!btn) return;
+        btn.className = 'auto-level-btn p-3 rounded-lg border text-left ' + (l === level ? 'active border-sky-400 bg-sky-950/60' : 'border-slate-700 bg-slate-800/80');
+        btn.setAttribute('aria-pressed', String(l === level));
       });
-
-      const badge = document.getElementById('badge-auto-level');
-      if (badge) {
-        if (level === 'baseline') {
-          badge.className = "px-2.5 py-0.5 text-xs rounded-full bg-slate-700 text-slate-300 font-bold border border-slate-600";
-          badge.innerText = "Úroveň 0: Běžný 24h ekviterm (bez akumulace)";
-        } else if (level === 'timer') {
-          badge.className = "px-2.5 py-0.5 text-xs rounded-full bg-sky-500/20 text-sky-300 font-bold border border-sky-500/40";
-          badge.innerText = "Úroveň A: Časovač v regulátoru TČ (týdenní plán)";
-        } else if (level === 'sgready') {
-          badge.className = "px-2.5 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40";
-          badge.innerText = "Úroveň B: SG Ready / FVE relé kontakt (Stav 3)";
-        } else {
-          badge.className = "px-2.5 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40";
-          badge.innerText = "Úroveň C: Prediktivní Smart Home (ideální výhled)";
-        }
-      }
-
+      document.getElementById('badge-auto-level').textContent = level === 'baseline' ? 'Základ · stálý ekviterm' : 'Optimalizace · denní topení';
       recalculateSimulation();
       updateUI();
     }
@@ -2604,9 +2450,9 @@ function recalculateSimulation() {
       container.innerHTML = `
         <div class="card p-3.5 border-sky-500/30">
           <div class="flex items-center justify-between text-xs text-slate-400">
-            <span class="font-semibold text-white">${state.automationLevel === 'baseline' ? 'Běžné řízení (Úroveň 0)' : (state.automationLevel === 'timer' ? 'Časovač TČ (Úroveň A)' : (state.automationLevel === 'sgready' ? 'SG Ready FVE (Úroveň B)' : 'Prediktivní řízení (Úroveň C)'))}</span>
-            <span class="text-[10px] px-1.5 py-0.2 rounded ${state.automationLevel === 'baseline' ? 'bg-slate-800 text-slate-400' : (state.automationLevel === 'timer' ? 'bg-sky-950 text-sky-300' : (state.automationLevel === 'sgready' ? 'bg-amber-950 text-amber-300' : 'bg-purple-950 text-purple-300'))} font-bold">
-              ${state.automationLevel === 'baseline' ? 'stálý 24h ekviterm' : (state.automationLevel === 'timer' ? '10–16h rozvrh' : (state.automationLevel === 'sgready' ? 'FVE solární boost' : '18h ideální výhled'))}
+            <span class="font-semibold text-white">${state.automationLevel === 'baseline' ? 'Základ · ekviterm' : 'Optimalizace · denní topení'}</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded ${state.automationLevel === 'baseline' ? 'bg-slate-800 text-slate-400' : 'bg-sky-950 text-sky-300'} font-bold">
+              ${state.automationLevel === 'baseline' ? 'stálý cíl 24 h' : 'priorita 10–16 h'}
             </span>
           </div>
           <div class="text-2xl font-bold text-white mt-1">${Math.round(r.el_opt_kwh).toLocaleString('cs-CZ')} <span class="text-sm font-normal text-slate-400">kWh</span></div>
@@ -2624,7 +2470,7 @@ function recalculateSimulation() {
 
         <div class="card p-3.5 ${state.automationLevel === 'baseline' ? 'border-slate-700 bg-slate-900/40' : 'border-emerald-500/30 bg-emerald-950/20'}">
           <div class="flex items-center justify-between text-xs ${state.automationLevel === 'baseline' ? 'text-slate-400' : 'text-emerald-400'} font-medium">
-            <span>Úspora zvolené úrovně</span>
+            <span>Úspora proti základu</span>
             <span class="text-[10px] px-1.5 py-0.2 rounded ${state.automationLevel === 'baseline' ? 'bg-slate-800 text-slate-400' : 'bg-emerald-900/60 text-emerald-300'} font-bold">
               ${state.automationLevel === 'baseline' ? '0 % (základ)' : `${r.diff_pct.toFixed(1).replace('.', ',')} %`}
             </span>
@@ -2633,7 +2479,7 @@ function recalculateSimulation() {
             ${state.automationLevel === 'baseline' ? '0' : `${Math.round(r.diff_kwh).toLocaleString('cs-CZ')}`} <span class="text-sm font-normal text-slate-400">kWh</span>
           </div>
           <div class="text-[11px] ${state.automationLevel === 'baseline' ? 'text-slate-400' : 'text-emerald-300 font-semibold'} mt-1">
-            ${state.automationLevel === 'baseline' ? 'Základní referenční provoz (žádná úspora)' : `Úspora: ${Math.round(r.savings_czk).toLocaleString('cs-CZ')} Kč (${state.automationLevel === 'timer' ? 'časový plán TČ' : (state.automationLevel === 'sgready' ? 'solární FVE boost' : 'prediktivní řízení')}; dle simulace)`}
+            ${state.automationLevel === 'baseline' ? 'Základní referenční provoz (žádná úspora)' : `Úspora: ${Math.round(r.savings_czk).toLocaleString('cs-CZ')} Kč (denní topení; dle simulace)`}
           </div>
         </div>
 
@@ -3320,7 +3166,7 @@ function recalculateSimulation() {
       ctx.fillText('☀️ Polední nabíjení (max COP & TUV)', x10 + 6, padT + 12);
 
       // 2. Indoor Room Comfort Corridor Shading
-      const yComfTop = yT(state.tInTarget + state.tTolerance);
+      const yComfTop = yT(state.tInTarget);
       const yComfBot = yT(state.tInTarget - state.tTolerance);
       ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
       ctx.fillRect(padL, yComfTop, cW, yComfBot - yComfTop);
@@ -4380,7 +4226,7 @@ const inputStateMap = {'input-qloss':'qLossDesign','input-tflow':'tFlowDesign','
   'input-tin':'tInTarget','input-tolerance':'tTolerance','input-price':'electricityPrice','input-dhw-liters':'dhwDailyLiters',
   'input-dhw-temp':'dhwTargetTemp','input-hp-service':'hpServiceYearly','input-gas-price':'gasPrice','input-co2-price':'co2AllowancePriceEur',
   'input-gas-service':'gasBoilerServiceYearly','input-gas-eff':'gasBoilerEfficiency','input-altitude':'altitude'};
-const scenarioEnums = {automationLevel:controllerLevels, heatingSystem:['floor','radiator'], floorMaterial:['beton','anhydrit'],
+const scenarioEnums = {automationLevel:['optimized'], heatingSystem:['floor','radiator'], floorMaterial:['beton','anhydrit'],
   floorCovering:['dlazba','vinyl','drevo'], dhwMode:['smart','standard'], economyPeriod:['season','annual']};
 const extraRanges = {gasMonthlyFixed:[0,5000],elMonthlyExtra:[0,5000],summerDhwCop:[1,7],centerYear:[2016,2022],weatherBaseAltitude:[-500,5000],tExtDesign:[-30,0],lat:[-90,90],lon:[-180,180]};
 const scenarioBooleans = ['dhwEnabled','etsEnabled','retainGas','isCustomWeatherLoaded'];
@@ -4392,11 +4238,13 @@ function scenarioPayload() {
   const r=simResults[state.currentSeason].results;
   const summary={season:state.currentSeason,period:state.economyPeriod,el:r.el_opt_kwh,under:r.comfort.opt.under,over:r.comfort.opt.over,
     cost:costs.reduce((a,c)=>a+c.hpTotal,0)/costs.length,saving:costs.reduce((a,c)=>a+c.saving,0)/costs.length};
-  return {version:3, settings, summary, weather:state.isCustomWeatherLoaded ? rawWeather : null};
+  return {version:3, settings, summary, energy:state.energy, weather:state.isCustomWeatherLoaded ? rawWeather : null};
 }
 function applyScenario(payload) {
   if (payload?.version !== 3 || !payload.settings) throw Error('Nepodporovaný scénář.');
-  const x = payload.settings, next = {};
+  const x = {...payload.settings}, next = {};
+  // Old saved controller variants migrate to the single daytime mode.
+  if (['baseline','timer','sgready','predictive'].includes(x.automationLevel)) x.automationLevel='optimized';
   Object.entries(inputStateMap).forEach(([id,key]) => {
     const el = document.getElementById(id), v = x[key];
     if (!Number.isFinite(v) || v < Number(el.min) || v > Number(el.max)) throw Error('Neplatná hodnota: '+key);
@@ -4419,6 +4267,8 @@ function applyScenario(payload) {
   const weather = x.isCustomWeatherLoaded ? payload.weather : originalWeatherV3;
   if (!Object.hasOwn(weather, x.currentSeason)) throw Error('Sezóna není v archivu.');
   Object.assign(next,{activeHp:hp,activeModelId:hp.id,currentSeason:x.currentSeason,locationName:String(x.locationName).slice(0,100)});
+  if(payload.energy) next.energy=validateEnergyConfig(payload.energy);
+  else if(state.energy) {next.energy={...defaultEnergyConfig(),custom:true,supplyVT:x.electricityPrice,distributionVT:0,electricityTax:0,systemServices:0,poze:0,gasSupply:x.gasPrice,gasDistribution:0,gasOTE:0,gasSupplyFixed:x.gasMonthlyFixed,gasDistributionFixed:0,existingConnection:true,includeOtherFixed:true,supplyFixed:x.elMonthlyExtra,networkFixed:0};}
   Object.assign(state,next); rawWeather = weather;
   Object.entries(inputStateMap).forEach(([id,k]) => document.getElementById(id).value=state[k]);
   document.getElementById('input-dhw-enabled').checked=state.dhwEnabled;
@@ -4426,7 +4276,7 @@ function applyScenario(payload) {
   setAutomationLevel(state.automationLevel);
   syncReviewControls();
 }
-function scenarioMessage(s) {document.getElementById('scenario-status').textContent=s;}
+function scenarioMessage(s) {const el=document.getElementById('scenario-status');if(el)el.textContent=s;}
 function saveScenario(slot) {
   const payload=scenarioPayload(); savedScenarios[slot]=payload;
   try { localStorage.setItem('tc-scenario-'+slot, JSON.stringify(payload)); scenarioMessage('Scénář '+slot+' uložen v tomto prohlížeči.'); }
@@ -4454,7 +4304,7 @@ function renderScenarioComparison() {
     if(!p)return '<p>'+slot+': dosud neuloženo</p>'; const x=p.settings;
     const s=p.summary;
     const numbers=s&&['el','under','over','cost','saving'].every(k=>Number.isFinite(s[k]));
-    return `<p><b>${slot}</b>: ${esc(x.locationName)} · ${nfmt(x.qLossDesign,1)} kW · ${esc(x.automationLevel)} · elektřina ${nfmt(x.electricityPrice,2)} / plyn ${nfmt(x.gasPrice,2)} Kč/kWh.</p>${numbers?`<p>Uloženo: sezóna ${esc(s.season)} · ${nfmt(s.el)} kWh · komfort pod/nad ${nfmt(s.under,1)}/${nfmt(s.over,1)} h. Průměr nákladů TČ ${nfmt(s.cost)} Kč a úspora proti plynu ${nfmt(s.saving)} Kč / ${s.period==='annual'?'modelový rok':'sezónu'}.</p>`:'<p>Načtením přepočtete výsledky.</p>'}`;
+    return `<p><b>${slot}</b>: ${esc(x.locationName)} · ${nfmt(x.qLossDesign,1)} kW · ${x.automationLevel==='baseline'?'Základ':'Optimalizace · denní topení'} · elektřina ${nfmt(x.electricityPrice,2)} / plyn ${nfmt(x.gasPrice,2)} Kč/kWh.</p>${numbers?`<p>Uloženo: sezóna ${esc(s.season)} · ${nfmt(s.el)} kWh · komfort pod/nad ${nfmt(s.under,1)}/${nfmt(s.over,1)} h. Průměr nákladů TČ ${nfmt(s.cost)} Kč a úspora proti plynu ${nfmt(s.saving)} Kč / ${s.period==='annual'?'modelový rok':'sezónu'}.</p>`:'<p>Načtením přepočtete výsledky.</p>'}`;
   }).join('');
 }
 function syncReviewControls() {
@@ -4481,18 +4331,6 @@ function renderReviewSummary() {
     const saving=b.el-a.el, pct=b.el?saving/b.el*100:0;
     el.textContent=`${state.currentSeason}: úspora ${nfmt(pct,1)} % (${nfmt(saving*state.electricityPrice)} Kč) · ${a.starts} sepnutí · mimo pásmo ${nfmt(a.under+a.over)} h`;
   });
-  const c= r.comfort, row=(name,x)=>`<tr><th>${name}</th><td>${nfmt(x.avg,2)}</td><td>${nfmt(x.min,2)} / ${nfmt(x.max,2)}</td><td>${nfmt(x.under,1)} / ${nfmt(x.over,1)}</td><td>${nfmt(x.degreeUnder,1)} / ${nfmt(x.degreeOver,1)}</td><td>${nfmt(x.heat)}</td><td>${nfmt(x.backup+x.dhwBackup,1)}</td></tr>`;
-  document.getElementById('comfort-review').innerHTML=`<h3>Komfort a energie · ${state.currentSeason}</h3><div class="review-scroll"><table><thead><tr><th>Řízení</th><th>Průměr °C</th><th>Min / max °C</th><th>Pod / nad pásmem h</th><th>Odchylka K·h</th><th>Teplo topení kWh</th><th>Patrona vč. TUV kWh</th></tr></thead><tbody>${row('Zvolené',c.opt)}${row('Ekviterm',c.baseline)}</tbody></table></div>
-    <p>Úspora vytápění: <b>${nfmt(r.el_std_heat-r.el_opt_heat)} kWh</b> · přesun TUV: <b>${nfmt(r.el_std_dhw-r.el_opt_dhw)} kWh</b>. Záporná úspora znamená vyšší spotřebu.</p>
-    ${c.opt.dhwUnmet+c.baseline.dhwUnmet>0.01?`<p>⚠ Nedodaná energie TUV: zvolený režim ${nfmt(c.opt.dhwUnmet,1)} kWh / ekviterm ${nfmt(c.baseline.dhwUnmet,1)} kWh. V těchto podmínkách nestačí výkon ve vyhrazených hodinách; rozdíl spotřeby není úsporou při stejné službě.</p>`:''}
-    <p>${c.opt.under+c.opt.over>0?'⚠ Zvolený režim nedodržuje komfortní pásmo po celou sezónu. Porovnejte teploty a dodané teplo.':'Komfortní pásmo je dodrženo s tolerancí měření 0,05 °C.'} Změna energie v domě: ${nfmt(c.opt.storage,1)} kWh; chyba energetické bilance ${nfmt(Math.abs(c.opt.balanceError)<0.000001?0:c.opt.balanceError,6)} kWh.</p>`;
-  const costs=seasons.map(s=>economyFor(simResults[s].results,s));
-  const avg=k=>costs.reduce((a,c)=>a+c[k],0)/costs.length;
-  document.getElementById('decision-review').textContent=`Průměr ${seasons.length} sezón: TČ ${nfmt(avg('hpTotal'))} Kč, plyn ${nfmt(avg('gasTotal'))} Kč; úspora ${nfmt(avg('saving'))} Kč / ${state.economyPeriod==='annual'?'modelový rok':'topnou sezónu'}.`;
-  const per=[-0.3,0,0.3], gasPrices=per.map(f=>state.gasPrice*(1+f)), elPrices=per.map(f=>state.electricityPrice*(1+f));
-  document.getElementById('sensitivity-review').innerHTML=`<h3>Citlivost úspory proti plynu · průměr ${seasons.length} sezón</h3><p>Ceny ±30 % kolem zadání. Kladná hodnota zvýhodňuje TČ. Stejný provoz a zvolené ekonomické období; ETS 2 podle přepínače.</p><div class="review-scroll"><table><tr><th>Elektřina ↓ / plyn → Kč/kWh</th>${gasPrices.map(g=>`<th>${nfmt(g,2)}</th>`).join('')}</tr>${elPrices.map(e=>`<tr><th>${nfmt(e,2)}</th>${gasPrices.map(g=>{const v=seasons.reduce((a,s)=>a+economyFor(simResults[s].results,s,state.economyPeriod,e,g).saving,0)/seasons.length;return `<td class="${v>=0?'review-positive':'review-negative'}">${nfmt(v)} Kč</td>`;}).join('')}</tr>`).join('')}</table></div><p>Hraniční cena elektřiny: <b>${nfmt((avg('gasTotal')-avg('hpFixed'))/avg('electricity'),2)} Kč/kWh</b> při zadané ceně plynu a stejném provozu.</p>`;
-  const sorted=[...seasons].sort((a,b)=>simResults[a].weather_stats.avg_temp-simResults[b].weather_stats.avg_temp);
-  document.getElementById('weather-review').textContent=[['Studená',sorted[0]],['Prostřední',sorted[Math.floor(sorted.length/2)]],['Mírná',sorted.at(-1)]].map(([label,s])=>`${label}: ${s}, ${nfmt(simResults[s].weather_stats.avg_temp,1)} °C, ${nfmt(simResults[s].results.el_opt_kwh)} kWh`).join(' · ');
   syncReviewControls();
 }
 function renderGasComparisonView() {
@@ -4504,21 +4342,21 @@ function renderGasComparisonView() {
   target.innerHTML=`<div class="card review-panel"><h3>TČ a plynový kotel · ${unit}</h3><p>${annual?'Říjen–duben z hodinové simulace; květen–září pouze odhad TUV se zadaným COP. Nezahrnuje vytápění mimo říjen–duben.':'Říjen–duben; roční servis a paušály jsou poměrně kráceny podle délky sezóny.'} Obě varianty dodávají stejné teplo jako zvolený režim TČ.</p>
     <p><b>TČ ${nfmt(avg('hpTotal'))} Kč · plyn ${nfmt(avg('gasTotal'))} Kč · úspora ${nfmt(avg('saving'))} Kč / ${unit}</b></p>
     <p>Úspora bez ETS 2: ${nfmt(avg('saving')-avg('ets'))} Kč. Zvolený příplatek ETS 2: ${nfmt(avg('ets'))} Kč. Jde o cenový scénář, nikoli předpověď ceny.</p>
-    <p>Rozdíl paušálu elektřiny ${nfmt(state.elMonthlyExtra)} Kč/měsíc · plyn ${nfmt(state.gasMonthlyFixed)} Kč/měsíc · přípojka u TČ ${state.retainGas?'zůstává':'se ruší'}. Servis TČ / kotle: ${nfmt(state.hpServiceYearly)} / ${nfmt(state.gasBoilerServiceYearly)} Kč/rok.</p>
+    <p>Započtené stálé platby elektřiny ${nfmt(state.elMonthlyExtra)} Kč/měsíc · plyn ${nfmt(state.gasMonthlyFixed)} Kč/měsíc · přípojka u TČ ${state.retainGas?'zůstává':'se ruší'}. Servis TČ / kotle: ${nfmt(state.hpServiceYearly)} / ${nfmt(state.gasBoilerServiceYearly)} Kč/rok.</p>
     <div id="gas-chart-v3" style="height:280px"></div><div class="review-scroll"><table><thead><tr><th>Sezóna</th><th>Teplo vč. TUV kWh</th><th>TČ el. kWh</th><th>TČ Kč</th><th>Plyn kWh</th><th>Plyn Kč</th><th>ETS 2 Kč</th><th>Úspora Kč</th></tr></thead><tbody>${seasons.map((s,i)=>{const c=costs[i];return `<tr><th>${s}</th>${['heat','electricity','hpTotal','gasKwh','gasTotal','ets','saving'].map(k=>`<td>${nfmt(c[k])}</td>`).join('')}</tr>`;}).join('')}<tr><th>Průměr</th>${['heat','electricity','hpTotal','gasKwh','gasTotal','ets','saving'].map(k=>`<td>${nfmt(avg(k))}</td>`).join('')}</tr></tbody></table></div>
     <p>Bez investice, dotace, financování a výměn zařízení. Celkové emise nelze určit bez emisního faktoru elektřiny. Součet pěti historických sezón není předpověď budoucích pěti let.</p></div>`;
   if(canvas)document.getElementById('gas-chart-v3').appendChild(canvas);
   drawGasBarChart();
 }
 const originalUpdateUIV3=updateUI;
-updateUI=function(){originalUpdateUIV3();renderReviewSummary();};
+updateUI=function(){originalUpdateUIV3();renderReviewSummary();renderGasOverview();renderSettingsHeatPump();renderLiveCosts();};
 const originalToggleSectionV3=toggleSection;
 toggleSection=function(mode,force){
   originalToggleSectionV3(mode,force);
   if(mode==='single') Array.from(document.getElementById('sec-single').children).slice(1).forEach(el=>el.classList.toggle('hidden',!state.sectionsExpanded.single));
 };
 const originalResetV3=resetDefaultParameters;
-resetDefaultParameters=function(){Object.assign(state,{economyPeriod:'season',etsEnabled:false,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7});originalResetV3();};
+resetDefaultParameters=function(){Object.assign(state,{economyPeriod:'season',etsEnabled:true,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7});originalResetV3();};
 const originalDiurnalV3=updateDiurnalView;
 updateDiurnalView=function(){
   originalDiurnalV3();
@@ -4526,12 +4364,12 @@ updateDiurnalView=function(){
   const idle=day.hours.filter(h=>(h.h>=22||h.h<6)&&!h.isRunning).length;
   document.getElementById('night-explanation-v3').textContent=`V tomto dni byl kompresor bez provozu ${idle} z 8 hodin mezi 22–06 h (součet úseků téhož kalendářního dne). ${idle<8?'Ve zbývajících hodinách bylo potřeba topit nebo ohřívat TUV.':'Podlahová a stavební akumulace pokryla celé vymezené období.'}`;
   const C=simResults[state.currentSeason].results.comfort.opt.Cf;
-  document.getElementById('capacity-explanation-v3').textContent=`Kapacita desky ${nfmt(C,2)} kWh/K. Rozkmit o 2 °C odpovídá ${nfmt(C*2,1)} kWh, tedy orientačně ${nfmt(C*2/state.qLossDesign,1)} h při návrhové ztrátě. Nejde o zaručenou dobu komfortu.`;
+  document.getElementById('capacity-explanation-v3').textContent=`Kapacita desky ${nfmt(C,2)} kWh/K. Nastavený pokles o ${nfmt(state.tTolerance,1)} °C odpovídá ${nfmt(C*state.tTolerance,1)} kWh, tedy orientačně ${nfmt(C*state.tTolerance/state.qLossDesign,1)} h při návrhové ztrátě. Nejde o zaručenou dobu komfortu.`;
 };
 const originalWeatherV3=rawWeather;
 const originalInitV3=init;
 init=function(){
-  Object.assign(state,{economyPeriod:'season',etsEnabled:false,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7,weatherBaseAltitude:392});
+  Object.assign(state,{economyPeriod:'season',etsEnabled:true,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7,weatherBaseAltitude:392});
   originalInitV3();
   onParamChange();
   ['single','table','dual','gas'].forEach(k=>toggleSection(k,false));
@@ -4542,10 +4380,215 @@ init=function(){
     input.onchange=()=>{const v=Number(input.value);if(input.value===''||!Number.isFinite(v)||v<Number(range.min)||v>Number(range.max)){input.value=range.value;return;}range.value=v;range.dispatchEvent(new Event('input',{bubbles:true}));syncReviewControls();};
     range.after(input);range.addEventListener('input',()=>input.value=range.value);
   });
-  document.getElementById('scenario-file').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>8e6)throw Error('Soubor je příliš velký.');applyScenario(JSON.parse(await file.text()));scenarioMessage('Scénář importován.');}catch(err){scenarioMessage(err.message);}e.target.value='';};
+  const scenarioFile=document.getElementById('scenario-file');
+  if(scenarioFile)scenarioFile.onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>8e6)throw Error('Soubor je příliš velký.');applyScenario(JSON.parse(await file.text()));scenarioMessage('Scénář importován.');}catch(err){scenarioMessage(err.message);}e.target.value='';};
   if(location.hash.startsWith('#scenario=')){try{applyScenario(JSON.parse(decodeURIComponent(location.hash.slice(10))));scenarioMessage('Načten sdílený scénář.');}catch(e){scenarioMessage('Odkaz nelze načíst: '+e.message);}}
   renderScenarioComparison();
 };
+
+function renderGasOverview() {
+  const target=document.getElementById('gas-overview');if(!target)return;
+  const seasons=getActiveSeasons();if(!seasons.length)return;
+  const costs=seasons.map(s=>economyFor(simResults[s].results,s));
+  const avg=k=>costs.reduce((a,c)=>a+c[k],0)/costs.length;
+  const saving=avg('saving'), unit=state.economyPeriod==='annual'?'modelový rok':'topnou sezónu';
+  target.innerHTML=`<h2 class="text-xl font-bold text-white mb-2">Tepelné čerpadlo vs. plyn</h2>
+    <p class="text-xs text-slate-400 mb-3">Průměr ${seasons.length} sezón · ${seasons[0]} až ${seasons.at(-1)} · stejné dodané teplo včetně TUV</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div><span class="text-sky-300">Tepelné čerpadlo</span><div class="text-2xl font-bold">${nfmt(avg('hpTotal'))} Kč</div></div>
+      <div><span class="text-amber-300">Plynový kotel</span><div class="text-2xl font-bold">${nfmt(avg('gasTotal'))} Kč</div></div>
+      <div><span>${saving>=0?'Úspora s TČ':'Vyšší náklady TČ'}</span><div class="text-2xl font-bold">${nfmt(Math.abs(saving))} Kč</div></div>
+    </div><p class="text-xs text-slate-400 mt-3">Za ${unit}, včetně započtených paušálů a servisu. ETS 2 ${state.etsEnabled?'zahrnuto':'vypnuto'}. Bez investičních nákladů.</p>
+    <button class="energy-button mt-3" onclick="toggleSection('gas',true);document.getElementById('sec-gas').scrollIntoView({behavior:'smooth'})">Podrobné srovnání s plynem ↓</button>`;
+}
+
+function renderSettingsHeatPump() {
+  const select=document.getElementById('settings-hp-select'), box=document.getElementById('settings-hp-parameters');
+  if(!select||!box)return;
+  const hp=state.activeHp;
+  const options=keymarkDatabase.map(h=>`<option value="${esc(h.id)}">${esc(h.name)}</option>`).join('');
+  if(select.dataset.options!==options){select.innerHTML=options;select.dataset.options=options;}
+  select.value=state.activeModelId;
+  const val=(v,d=2)=>Number.isFinite(v)?nfmt(v,d):'Neuvedeno';
+  const edit=(key,label)=>`<input aria-label="${label}" type="number" min="${key.startsWith('cop')?1.2:0.1}" max="${key.startsWith('cop')?10:50}" step="0.01" value="${hp[key]}" class="review-number" onchange="editHeatPump('${key}',this.value)">`;
+  const rows=[['+7','A7'],['+2','A2'],['−7','Am7'],['−15','Am15']];
+  box.innerHTML=`<div class="review-scroll"><table class="w-full text-sm text-left"><thead><tr><th>Venkovní teplota</th><th>COP · voda 35 °C</th><th>COP · voda 55 °C (radiátory)</th></tr></thead><tbody>
+    ${rows.map(([temp,key])=>`<tr><th>${temp} °C</th><td>${edit('cop'+key+'W35','COP A'+temp+' W35')}</td><td>${edit('cop'+key+'W55','COP A'+temp+' W55')}</td></tr>`).join('')}
+    <tr><th>SCOP · sezónní údaj v databázi</th><td>${val(hp.scop35)}</td><td>${val(hp.scop55)}</td></tr>
+    <tr><th>Návrhový výkon</th><td>${edit('pDesign35','Výkon pro vodu 35 °C')} kW</td><td>${edit('pDesign55','Výkon pro vodu 55 °C')} kW</td></tr>
+    </tbody></table></div>
+    <p class="text-sm mt-3">Minimální modulovaný tepelný výkon: <b>${edit('minMod','Minimální modulovaný výkon')} kW</b> · Referenční COP TUV: <b>${val(hp.copDhwRef)}</b> · Profil TUV: <b>${esc(hp.dhwProfile||'Neuvedeno')}</b></p>
+    <button class="text-xs text-sky-300 underline mt-2" onclick="selectKeymarkModel(state.activeModelId)">Obnovit parametry vybraného modelu</button><p class="text-xs text-amber-300 mt-2">${hp.userEdited?'Vlastní úpravy parametrů čerpadla':'Výchozí parametry databáze'}</p><p class="text-sm mt-2">Chladivo: ${esc(hp.refrigerant||'Neuvedeno')} · Model: ${esc(hp.modelCode||hp.name)}</p>
+    <p class="text-xs text-slate-400 mt-2">COP, návrhové výkony a minimální modulaci lze upravit; změny ihned přepočítají spotřebu i náklady. SCOP a údaje TUV jsou informativní údaje databáze. Výběrem modelu se obnoví jeho původní parametry. COP je okamžitá účinnost při uvedené venkovní teplotě a teplotě vody; SCOP je sezónní údaj. Simulace z těchto bodů odvozuje COP podle počasí a teploty vody. Výše uvedený SCOP není výsledkem simulace.</p>
+    <p class="text-xs text-sky-300 mt-2">Aktuální soustava: ${state.heatingSystem==='radiator'?'radiátory · křivka pro vodu 55 °C':'podlaha · křivka pro vodu 35 °C'}. Návrhová teplota vody ${val(state.tFlowDesign,1)} °C. Soustavu a teplotu vody nastavíte níže.</p>`;
+}
+
+const editableHpKeys=['copA7W35','copA2W35','copAm7W35','copAm15W35','copA7W55','copA2W55','copAm7W55','copAm15W55','pDesign35','pDesign55','minMod'];
+function editHeatPump(key,value) {
+  if(!editableHpKeys.includes(key))return;
+  const v=Number(value), cop=key.startsWith('cop');
+  if(value===''||!Number.isFinite(v)||v<(cop?1.2:0.1)||v>(cop?10:50)){renderSettingsHeatPump();return;}
+  const next={...state.activeHp,[key]:v,userEdited:true};
+  if(next.minMod>Math.min(next.pDesign35,next.pDesign55)){alert('Minimální výkon nesmí překročit návrhový výkon.');renderSettingsHeatPump();return;}
+  state.activeHp=next;recalculateSimulation();updateUI();
+}
+let costReference=null;
+function currentCostSnapshot(){
+ const seasons=getActiveSeasons(), costs=seasons.map(s=>economyFor(simResults[s].results,s));
+ return {hp:costs.reduce((a,c)=>a+c.hpTotal,0)/costs.length,gas:costs.reduce((a,c)=>a+c.gasTotal,0)/costs.length};
+}
+function setCostReference(){costReference=currentCostSnapshot();renderLiveCosts();}
+function renderLiveCosts(){
+ const box=document.getElementById('settings-live-costs');if(!box)return;
+ const c=currentCostSnapshot();if(!costReference)costReference={...c};
+ const delta=v=>(v>=0?'+':'−')+nfmt(Math.abs(v))+' Kč';
+ box.innerHTML=`<div class="flex flex-wrap gap-3 justify-between"><div><b>TČ ${nfmt(c.hp)} Kč</b><br><small>Změna ${delta(c.hp-costReference.hp)}</small></div><div><b>Plyn ${nfmt(c.gas)} Kč</b><br><small>Změna ${delta(c.gas-costReference.gas)}</small></div><div><b>${c.gas>=c.hp?'Úspora s TČ':'Vícenáklady TČ'} ${nfmt(Math.abs(c.gas-c.hp))} Kč</b><br><small>Průměr vybraných sezón · ${state.economyPeriod==='annual'?'modelový rok':'topná sezóna'}</small></div></div><div class="text-xs text-slate-400 mt-2">Změna proti uloženému srovnání (zpočátku stav při načtení). <button class="text-sky-300 underline" onclick="setCostReference()">Porovnávat od nynějška</button></div>`;
+}
+
+// ČEZ Prodej / ČEZ Distribuce and GasNet, verified 2026-10-25.
+// All editable amounts include 21% VAT. Unit prices are Kč/kWh.
+const energySources = {
+  electricity:'https://www.cez.cz/webpublic/file/edee/ceniky/moo_ele_cez_fix_na_3_roky_30012026_012026.pdf',
+  gas:'https://www.cez.cz/webpublic/file/edee/ceniky/moo_mop_plyn_gasnet_fix_na_3_roky_17042026_012026.pdf'
+};
+const energyTariffs = {
+  D02d:{supplyVT:3.25,supplyNT:3.25,distributionVT:2.51508,distributionNT:2.51508,ntShare:0,
+    breakers:[123.42,198.44,248.05,309.76,395.67,494.89,619.52,779.24]},
+  D57d:{supplyVT:3.49,supplyNT:3.41,distributionVT:0.91327,distributionNT:0.14097,ntShare:83.333333,
+    breakers:[268.62,429.55,537.24,671.55,859.10,1084.16,1559.69,2358.29]}
+};
+const breakerLabels=['3×10 A / 1×25 A','3×16 A','3×20 A','3×25 A','3×32 A','3×40 A','3×50 A','3×63 A'];
+const gasBands=[
+  {label:'Do 1,89 MWh/rok',distribution:0.90969,supplyFixed:113.74,distributionFixed:134.24},
+  {label:'Nad 1,89 do 7,56 MWh/rok',distribution:0.49280,supplyFixed:125.84,distributionFixed:199.76},
+  {label:'Nad 7,56 do 15 MWh/rok',distribution:0.44662,supplyFixed:163.35,distributionFixed:228.27},
+  {label:'Nad 15 do 25 MWh/rok',distribution:0.41324,supplyFixed:163.35,distributionFixed:268.85},
+  {label:'Nad 25 do 45 MWh/rok',distribution:0.34423,supplyFixed:163.35,distributionFixed:410.69},
+  {label:'Nad 45 do 63 MWh/rok',distribution:0.27850,supplyFixed:163.35,distributionFixed:653.71}
+];
+function defaultEnergyConfig() {
+  return {tariff:'D02d',breakerIndex:3,existingConnection:true,includeOtherFixed:false,annualEl:5000,
+    supplyVT:3.25,supplyNT:3.25,distributionVT:2.51508,distributionNT:2.51508,ntShare:0,
+    electricityTax:0.03424,systemServices:0.19873,poze:0,supplyFixed:163.35,networkFixed:15.57,breakerFixed:309.76,
+    gasBand:3,annualGas:16000,gasSupply:1.06,gasDistribution:0.41324,gasOTE:0.00491,gasTax:0,
+    gasSupplyFixed:163.35,gasDistributionFixed:268.85,custom:false};
+}
+function energyPrices(config) {
+  const share=config.tariff==='D57d'?config.ntShare/100:0;
+  const common=config.electricityTax+config.systemServices+config.poze;
+  const vt=config.supplyVT+config.distributionVT+common, nt=config.supplyNT+config.distributionNT+common;
+  const electricity=vt*(1-share)+nt*share;
+  const breaker=config.existingConnection?0:config.breakerFixed;
+  const fixed=breaker; // Only heating-related breaker costs are included.
+  const gas=config.gasSupply+config.gasDistribution+config.gasOTE+config.gasTax;
+  const gasFixed=config.gasSupplyFixed+config.gasDistributionFixed;
+  return {vt,nt,electricity,breaker,fixed,gas,gasFixed,
+    averageEl:electricity+12*fixed/config.annualEl,averageGas:gas+12*gasFixed/config.annualGas};
+}
+const energyNumberBounds={annualEl:[1,1000000],annualGas:[1,1000000],ntShare:[0,100],
+  supplyVT:[0,100],supplyNT:[0,100],distributionVT:[0,100],distributionNT:[0,100],electricityTax:[0,100],systemServices:[0,100],poze:[0,100],
+  supplyFixed:[0,100000],networkFixed:[0,100000],breakerFixed:[0,100000],
+  gasSupply:[0,100],gasDistribution:[0,100],gasOTE:[0,100],gasTax:[0,100],gasSupplyFixed:[0,100000],gasDistributionFixed:[0,100000]};
+function validateEnergyConfig(value) {
+  if(!value||!Object.hasOwn(energyTariffs,value.tariff))throw Error('Neplatná sazba elektřiny.');
+  const result={...defaultEnergyConfig(),tariff:value.tariff};
+  for(const [k,[lo,hi]] of Object.entries(energyNumberBounds)) {
+    if(!Number.isFinite(value[k])||value[k]<lo||value[k]>hi)throw Error('Neplatná cena nebo spotřeba: '+k);
+    result[k]=value[k];
+  }
+  for(const k of ['existingConnection','includeOtherFixed','custom']){if(typeof value[k]!=='boolean')throw Error('Neplatná volba energie.');result[k]=value[k];}
+  for(const [k,max] of [['breakerIndex',7],['gasBand',5]]){if(!Number.isInteger(value[k])||value[k]<0||value[k]>max)throw Error('Neplatné pásmo.');result[k]=value[k];}
+  return result;
+}
+function applyEnergyPrices() {
+  if(!state.energy)return;
+  const prices=energyPrices(state.energy);
+  state.electricityPrice=prices.electricity;state.elMonthlyExtra=prices.fixed;
+  state.gasPrice=prices.gas;state.gasMonthlyFixed=prices.gasFixed;
+}
+function changeEnergy(key,value) {
+  const next={...state.energy};
+  if(key==='tariff'){
+    if(!Object.hasOwn(energyTariffs,value))return;
+    const t=energyTariffs[value];
+    Object.assign(next,{tariff:value,supplyVT:t.supplyVT,supplyNT:t.supplyNT,distributionVT:t.distributionVT,distributionNT:t.distributionNT,ntShare:t.ntShare,breakerFixed:t.breakers[next.breakerIndex]});
+  } else if(key==='breakerIndex') {
+    const i=Number(value);if(!Number.isInteger(i)||i<0||i>7)return;
+    next.breakerIndex=i;next.breakerFixed=energyTariffs[next.tariff].breakers[i];
+  } else if(key==='gasBand') {
+    const i=Number(value);if(!Number.isInteger(i)||i<0||i>5)return;
+    const b=gasBands[i];Object.assign(next,{gasBand:i,gasDistribution:b.distribution,gasSupplyFixed:b.supplyFixed,gasDistributionFixed:b.distributionFixed});
+  } else if(['existingConnection','includeOtherFixed'].includes(key))next[key]=Boolean(value);
+  else if(Object.hasOwn(energyNumberBounds,key)){
+    const [lo,hi]=energyNumberBounds[key], v=Number(value);
+    if(value===''||!Number.isFinite(v)||v<lo||v>hi){renderEnergySettings();return;}
+    next[key]=v;if(!['annualEl','annualGas','ntShare'].includes(key))next.custom=true;
+  } else return;
+  state.energy=validateEnergyConfig(next);
+  recalculateSimulation();updateUI();
+}
+function resetEnergyPrices() {
+  state.energy=defaultEnergyConfig();recalculateSimulation();updateUI();
+}
+function renderEnergySettings() {
+  const box=document.getElementById('energy-form');if(!box||!state.energy)return;
+  const e=state.energy, p=energyPrices(e);
+  const field=(key,label,unit='Kč/kWh',step='0.00001')=>`<label class="energy-field" for="energy-${key}"><span>${label} <small>${unit}</small></span><input id="energy-${key}" type="number" min="${energyNumberBounds[key][0]}" max="${energyNumberBounds[key][1]}" step="${step}" onchange="changeEnergy('${key}',this.value)"></label>`;
+  if(!box.dataset.ready){
+    box.innerHTML=`<p class="energy-note">Všechny ceny včetně 21 % DPH. ČEZ Fix na 3 roky · ČEZ Distribuce / GasNet · ověřeno 25. 10. 2026. Výchozí jistič 3×25 A je předpoklad, upravte podle smlouvy.</p>
+    <div class="energy-grid"><section><h3>Elektřina</h3>
+    <label class="energy-field" for="energy-tariff"><span>Distribuční sazba</span><select id="energy-tariff" onchange="changeEnergy('tariff',this.value)"><option>D02d</option><option>D57d</option></select></label>
+    <label class="energy-field" for="energy-breakerIndex"><span>Hlavní jistič</span><select id="energy-breakerIndex" onchange="changeEnergy('breakerIndex',this.value)">${breakerLabels.map((s,i)=>`<option value="${i}">${s}</option>`).join('')}</select></label>
+    <label class="energy-check"><input id="energy-existingConnection" type="checkbox" onchange="changeEnergy('existingConnection',this.checked)"> Elektro přípojku stejně používám</label>
+    <p class="energy-note">Zaškrtnutí vyřadí pouze poplatek za jistič ze srovnání vytápění. Na skutečné faktuře zůstává. Při změně sazby či jističe může vzniknout rozdíl plateb. Ostatní stálé platby elektřiny se do topení nezapočítávají.</p>
+    ${field('supplyVT','Silová elektřina VT')}${field('distributionVT','Distribuce VT')}
+    <div id="energy-nt-fields">${field('supplyNT','Silová elektřina NT')}${field('distributionNT','Distribuce NT')}${field('ntShare','Podíl spotřeby v NT','%','0.1')}<p class="energy-note">Výchozích 83,33 % je odhad, nikoli výsledek konkrétního HDO. Stejný podíl platí pro oba režimy řízení.</p></div>
+    ${field('electricityTax','Daň z elektřiny')}${field('systemServices','Systémové služby')}${field('poze','POZE (účtovaná sazba)')}
+    <p class="energy-note">POZE je v převzatém ceníku účtováno jako minimum varianty podle jističe a spotřeby; při nulové sazbě podle jističe vychází 0. Vlastní částku zde zadávejte jako výslednou sazbu.</p>
+    ${field('breakerFixed','Platba za jistič','Kč/měsíc','0.01')}
+    ${field('annualEl','Roční spotřeba pro průměr','kWh/rok','1')}
+    <div id="energy-electric-result" class="energy-result"></div><p id="energy-recommendation" class="energy-note"></p>
+    <p class="energy-note">D57d je určená pro elektrické vytápění / TČ při splnění podmínek distributora. Pro posouzení sazby použijte celou roční spotřebu domu. Bonusy a individuální nabídky nejsou zahrnuté.</p>
+    </section><section><h3>Plyn</h3>
+    <label class="energy-field" for="energy-gasBand"><span>Roční odběrové pásmo GasNet</span><select id="energy-gasBand" onchange="changeEnergy('gasBand',this.value)">${gasBands.map((b,i)=>`<option value="${i}">${b.label}</option>`).join('')}</select></label>
+    ${field('gasSupply','Dodávka plynu')}${field('gasDistribution','Distribuce plynu bez OTE')}${field('gasOTE','OTE')}${field('gasTax','Daň z plynu (domácnost: 0)')}
+    ${field('gasSupplyFixed','Stálá platba dodavateli','Kč/měsíc','0.01')}${field('gasDistributionFixed','Stálá platba distribuci','Kč/měsíc','0.01')}${field('annualGas','Roční spotřeba pro průměr','kWh/rok','1')}
+    <div id="energy-gas-result" class="energy-result"></div><p id="energy-gas-band-note" class="energy-note"></p>
+    <label class="energy-check"><input id="energy-ets" type="checkbox" onchange="state.etsEnabled=this.checked;recalculateSimulation();updateUI()"> Zahrnout scénář ETS 2</label>
+    <p class="energy-note">Cenu povolenky nastavíte níže v této kartě. Základní ceník níže ETS 2 nezahrnuje.</p>
+    <label class="energy-check"><input id="energy-retainGas" type="checkbox" onchange="state.retainGas=this.checked;recalculateSimulation();updateUI()"> Přípojku plynu ponechám i u TČ</label>
+    <p class="energy-note">Při ponechání přípojky se její stálé platby započítají i k TČ.</p>
+    <h3>Jak se ceny použijí</h3><p class="energy-note">Průměr v záhlaví = cena odebrané kWh + 12× započtené měsíční platby / zadaná roční spotřeba. Roční spotřeba zde slouží pouze k přepočtu této ceny. Simulace oceňuje skutečnou spotřebu a přičítá stálé platby zvlášť, nikdy dvakrát. V sezónním přehledu se platby poměrně krátí.</p>
+    <p class="energy-note">Výchozí produkt Fix na 3 roky má nejnižší cenu komodity mezi porovnanými standardními nabídkami ČEZ Fix 3 roky, Online 1 rok a Na neurčito. Sjednání je podmíněno nabídkou pro odběrné místo a tříletým závazkem; nejde o záruku nejnižší celkové ceny pro každou domácnost.</p>
+    <p class="energy-note"><a href="${energySources.electricity}" target="_blank" rel="noopener">Ceník elektřiny (30. 1. 2026)</a> · <a href="${energySources.gas}" target="_blank" rel="noopener">Ceník plynu (17. 4. 2026)</a> · regulované ceny od 1. 1. 2026.</p>
+    </section></div><div class="energy-footer"><span id="energy-edited"></span><button type="button" onclick="resetEnergyPrices()">Obnovit ceníky ČEZ</button><button type="button" onclick="document.getElementById('energy-card').open=false">Minimalizovat</button></div>`;
+    box.dataset.ready='true';
+  }
+  for(const key of [...Object.keys(energyNumberBounds),'tariff','breakerIndex','gasBand']){const input=document.getElementById('energy-'+key);if(input)input.value=e[key];}
+  for(const key of ['existingConnection'])document.getElementById('energy-'+key).checked=e[key];
+  document.getElementById('energy-ets').checked=state.etsEnabled;
+  document.getElementById('energy-retainGas').checked=state.retainGas;
+  document.getElementById('energy-breakerFixed').disabled=e.existingConnection;
+  document.getElementById('energy-nt-fields').hidden=e.tariff!=='D57d';
+  document.getElementById('energy-summary').textContent=`${e.tariff} · ${nfmt(p.averageEl,2)} Kč/kWh`;
+  document.getElementById('energy-electric-result').textContent=`Za odběr ${nfmt(p.electricity,5)} Kč/kWh · stálé platby ${nfmt(p.fixed,2)} Kč/měsíc (z toho jistič ${nfmt(p.breaker,2)} Kč). Průměr ${nfmt(p.averageEl,2)} Kč/kWh.`;
+  document.getElementById('energy-gas-result').textContent=`Za odběr ${nfmt(p.gas,5)} Kč/kWh · stálé platby ${nfmt(p.gasFixed,2)} Kč/měsíc. Průměr ${nfmt(p.averageGas,2)} Kč/kWh bez ETS 2.`;
+  const limits=[1890,7560,15000,25000,45000,63000], band=limits.findIndex(v=>e.annualGas<=v);
+  document.getElementById('energy-gas-band-note').textContent=band<0?'Nad 63 MWh je nutný kapacitní ceník; toto pásmo model nepokrývá.':band!==e.gasBand?'Zadaná roční spotřeba odpovídá jinému pásmu. Zvolte '+gasBands[band].label+'.':'Pásmo odpovídá zadané roční spotřebě.';
+  const comparisons=Object.entries(energyTariffs).map(([tariff,t])=>{const config={...e,...t,tariff,breakerFixed:t.breakers[e.breakerIndex]};return {tariff,cost:energyPrices(config).averageEl*e.annualEl};}).sort((a,b)=>a.cost-b.cost);
+  document.getElementById('energy-recommendation').textContent=`Při cenách Fix 3 roky a zadané spotřebě vychází z D02d/D57d levněji ${comparisons[0].tariff}, přibližně o ${nfmt(comparisons[1].cost-comparisons[0].cost)} Kč/rok. Pro D57d se zde předpokládá 83,33 % odběru v NT; nejde o individuální návrh tarifu.`;
+  document.getElementById('energy-edited').textContent=e.custom?'Ceník obsahuje vlastní úpravy.':'Předvyplněno z ceníků ČEZ.';
+  for(const [id,value] of [['input-price',p.electricity],['input-gas-price',p.gas]]){const input=document.getElementById(id);input.value=value;const numeric=document.getElementById(id+'-number');if(numeric)numeric.value=value;}
+}
+// Keep all existing cost views on the same derived prices, including resets.
+const recalculateBeforeEnergy=recalculateSimulation;
+recalculateSimulation=function(){state.automationLevel="optimized";applyEnergyPrices();recalculateBeforeEnergy();};
+const updateBeforeEnergy=updateUI;
+updateUI=function(){updateBeforeEnergy();renderEnergySettings();};
+const initBeforeEnergy=init;
+init=function(){state.energy=defaultEnergyConfig();initBeforeEnergy();renderEnergySettings();};
+const resetBeforeEnergy=resetDefaultParameters;
+resetDefaultParameters=function(){state.energy=defaultEnergyConfig();resetBeforeEnergy();};
 
     window.onload = init;
   </script>

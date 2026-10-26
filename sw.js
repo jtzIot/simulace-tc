@@ -1,5 +1,5 @@
 // Service Worker for Offline PWA Support
-const CACHE_NAME = 'simulace-tc-v3-20261022';
+const CACHE_NAME = 'simulace-tc-v3-ets-default-20261025';
 const ASSETS = [
   './',
   './index.html',

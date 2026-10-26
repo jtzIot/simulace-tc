@@ -1,5 +1,5 @@
-// Shared 10-minute energy balance for all four controllers. Weather is hourly.
-const controllerLevels = ['baseline', 'timer', 'sgready', 'predictive'];
+// Shared 10-minute energy balance for both controllers. Weather is hourly.
+const controllerLevels = ['baseline', 'optimized'];
 let controllerResults = {};
 const bounded = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 function simulateController(weather, level) {
@@ -8,7 +8,7 @@ function simulateController(weather, level) {
   const Cf = state.floorAreaM2 * state.floorThicknessMm / 1000 * (concrete ? 2350 * 1020 : 2150 * 1000) / 3600000;
   const Cr = 9.5 * area, G = (concrete ? 1.68 : 1.85) * area;
   const H = state.qLossDesign / (state.tInTarget - state.tExtDesign);
-  const low = state.tInTarget - state.tTolerance, high = state.tInTarget + state.tTolerance;
+  const low = state.tInTarget - state.tTolerance, high = state.tInTarget;
   const radiator = state.heatingSystem === 'radiator';
   const correction = -0.0065 * (state.altitude - (state.weatherBaseAltitude ?? 392));
   const temps = weather.t.map(t => t + correction);
@@ -34,19 +34,13 @@ function simulateController(weather, level) {
     // DHW priority occupies a fraction of compressor time in this hour.
     const share = cap > 0 ? dhwHp / cap : 0;
     let charge = false, discharge = false;
-    if (level !== 'baseline' && !radiator) {
+    // Daytime priority: charge at 10–16 h; use stored heat otherwise.
+    // Heating remains available outside the window to protect comfort.
+    if (level === 'optimized') {
       charge = h >= 10 && h < 16;
-      discharge = h >= 22 || h < 6;
-      if (level === 'sgready') charge = charge && (weather.sol[ix] >= 0.05 || (h >= 11 && h < 14));
-      if (level === 'predictive') {
-        let count = 0, future = 0;
-        for (let j = ix; j < Math.min(temps.length, ix + 18); j++) { future += temps[j]; count++; }
-        future /= count;
-        charge = charge || te > future + 0.8;
-        discharge = discharge && te < future;
-      }
+      discharge = !charge;
     }
-    const target = state.tInTarget + (charge ? 0.65 : discharge ? -0.65 : 0) * state.tTolerance;
+    const target = state.tInTarget - (discharge ? 0.65 : 0) * state.tTolerance;
     let qHour = 0, eHour = 0, bkHour = 0, waterHour = 0, runHour = dhwHp > 0;
     if (i === 0) initialEnergy = Cf * tf + Cr * tr;
     for (let step = 0; step < 6; step++) {
@@ -82,7 +76,7 @@ function simulateController(weather, level) {
     }
     if (i < 0) continue;
     heat += qHour; e += eHour; de += dhwEl; dq += qdhw; backup += bkHour; dhwBackup += dhwBk; dhwUnmet += requestedDhw - qdhw;
-    hours.push({h, te, tr, tf, tfl: waterHour, q_hp: qHour, q_dhw: qdhw,
+    hours.push({h, te, tr, tf, controlTarget: target, tfl: waterHour, q_hp: qHour, q_dhw: qdhw,
       p_el_opt: eHour + dhwEl, cop_opt: eHour + dhwEl > 0 ? (qHour + qdhw) / (eHour + dhwEl) : 0,
       isRunning: runHour, isCharge: charge, isDischarge: discharge,
       heatEl: eHour, dhwEl, backup: bkHour, dhwBackup: dhwBk});

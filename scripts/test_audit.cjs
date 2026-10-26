@@ -1,0 +1,35 @@
+const fs=require('fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync(require('path').join(__dirname,'../index.html'),'utf8');
+const app=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('let rawWeather'));
+const run=new Function('window','document',app+'\nreturn code=>eval(code)')({addEventListener(){}},{});
+const near=(a,b,msg)=>assert(Math.abs(a-b)<1e-7,msg+': '+a+' != '+b);
+run(`Object.assign(state,{energy:defaultEnergyConfig(),economyPeriod:'season',etsEnabled:false,retainGas:false,summerDhwCop:2.7,weatherBaseAltitude:392});recalculateSimulation()`);
+const snapshot=run('({state,simResults,rawWeather})');
+let worstBalance=0;
+for(const [season,x] of Object.entries(snapshot.simResults)) {
+ const r=x.results,c=run(`economyFor(simResults['${season}'].results,'${season}')`),st=snapshot.state;
+ const year=Number(season.slice(5)), days=snapshot.rawWeather[season].t.length/24;
+ const yearDays=year%4===0&&(year%100!==0||year%400===0)?366:365, fraction=days/yearDays;
+ const gas=r.th_opt_heat/(st.gasBoilerEfficiency/100)+r.th_opt_dhw/0.86;
+ near(c.gasKwh,gas,'gas conversion');
+ near(c.hpTotal,r.el_opt_kwh*5.99805+(st.hpServiceYearly)*fraction,'independent electricity invoice');
+ near(c.gasTotal,gas*1.47815+(432.20*12+st.gasBoilerServiceYearly)*fraction,'independent gas invoice');
+ near(c.saving,c.gasTotal-c.hpTotal,'saving');
+ near(r.scop_opt,r.th_kwh/r.el_opt_kwh,'SCOP must be ratio of energies');
+ near(x.daily.reduce((v,d)=>v+d.th_opt,0),r.th_kwh,'thermal aggregation');
+ const b=r.comfort.opt;worstBalance=Math.max(worstBalance,Math.abs(b.balanceError));
+ assert(b.hours.every(h=>[h.p_el_opt,h.q_hp,h.q_dhw,h.tr,h.tf].every(Number.isFinite)),'finite physical states');
+ run('state.etsEnabled=true');
+ const withETS=run(`economyFor(simResults['${season}'].results,'${season}')`);
+ near(withETS.gasTotal-c.gasTotal,gas*30*25*0.00018*1.21,'ETS 30 EUR/t dimensional conversion');
+ run('state.etsEnabled=false;state.retainGas=true');
+ const retained=run(`economyFor(simResults['${season}'].results,'${season}')`);
+ near(retained.hpTotal-c.hpTotal,432.20*12*fraction,'retained gas fixed cost');
+ run('state.retainGas=false');
+}
+assert.equal(run('state.lat'),null);assert.equal(run('state.lon'),null);
+assert(!/RD_Letkov|Users[\\/]+jtz|lat: 49\.73|lon: 13\.46/.test(html),'no original site coordinates or personal paths in delivered HTML');
+assert(html.indexOf('id="gas-overview"')<html.indexOf('<header'),'comparison first');
+assert(html.includes('cez.cz/webpublic/file/edee/ceniky/'),'CEZ sources preserved');
+console.log('PASS: independent invoices for 10 seasons, leap years, SCOP, heat totals, ETS, retained gas, anonymous HTML and comparison placement. Maximum energy balance residual: '+worstBalance+' kWh');
+console.log(JSON.stringify(run(`getActiveSeasons().map(s=>({season:s,...economyFor(simResults[s].results,s)}))`),null,2));

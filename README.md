@@ -48,3 +48,12 @@ Výchozí sezóna 2022/23 v modelu v3: přibližně 3 046 kWh u prediktivního r
 Testy kontrolují syntaxi sestaveného JavaScriptu, všech deset sezón, zachování energie, součet denních spotřeb, nulový rozdíl při volbě reference, oddělený ETS 2, roční TUV, vypnutou i standardní TUV, nedostatečný výkon za mrazu a radiátorovou bilanci. V prohlížeči byly ověřeny přepínače ekonomiky, uložení/obnova A/B, shoda přehledu plynu a denní detail mrazu.
 
 Nasazení na GitHub Pages je samostatný krok; místní sestavení nic nepublikuje.
+
+## Aktualizace 26. 10. 2026
+
+Úvodní srovnání nákladů TČ a plynu, sbalené nastavení domu, editovatelné COP a výkony čerpadla a průběžné změny nákladů. Pouze denní optimalizace; tolerance 0–3 °C pod cílem. Detailní ceníky ČEZ pro elektřinu a plyn, volitelné započtení jističe; ostatní elektrické paušály jsou vyloučeny. Výchozí cenový scénář ETS 2 je zapnutý za 30 €/t CO₂ a lze jej vypnout. Přesné výchozí souřadnice nejsou součástí aplikace.
+
+Sestavení: `python scripts/build_full_interactive_app.py`.
+Kontroly: `node scripts/test_model_v3.cjs`, `node scripts/test_energy_prices.cjs`, `node scripts/test_audit.cjs`.
+
+Vlastní úpravy čerpadla platí pro aktuální otevření stránky. Hodnoty databáze nejsou ověřením skutečného provozu; modelové náklady nezahrnují investici.

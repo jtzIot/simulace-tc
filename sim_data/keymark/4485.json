@@ -1,0 +1,3137 @@
+{
+  "meta": {
+    "Certificate Holder": "Bosch Thermotechnik GmbH  \r\n            Junkersstraße 20 - 24  \r\n            73249\r\n            Wernau  \r\n            Germany",
+    "Registration number": "011-1W0675",
+    "Refrigerant": "R290",
+    "Mass of Refrigerant": "0,950 kg",
+    "Certification Date": "28.08.2023",
+    "Testing laboratory": "Fraunhofer ISE, DE"
+  },
+  "models": [
+    {
+      "name": "CS5800iAW 7 OR180 MCP-S",
+      "groups": [
+        {
+          "mode": "General",
+          "title": "Configure model",
+          "rows": [
+            [
+              "Model name",
+              [
+                "CS5800iAW 7 OR180 MCP-S"
+              ]
+            ],
+            [
+              "Application",
+              [
+                "Heating + DHW + low temp"
+              ]
+            ],
+            [
+              "Units",
+              [
+                "Indoor + Outdoor"
+              ]
+            ],
+            [
+              "Climate Zone",
+              [
+                "Colder Climate + Warmer Climate"
+              ]
+            ],
+            [
+              "Reversibility",
+              [
+                "Yes"
+              ]
+            ],
+            [
+              "Cooling mode application (optional)",
+              [
+                "n/a"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "General",
+          "title": "General Data",
+          "rows": [
+            [
+              "Power supply",
+              [
+                "3x400V 50Hz"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-2",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Heat output",
+              [
+                "2.83 kW",
+                "3.18 kW"
+              ]
+            ],
+            [
+              "El input",
+              [
+                "0.59 kW",
+                "1.18 kW"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "4.81",
+                "2.7"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-4",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Shutting off the heat transfer medium flow",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Complete power supply failure",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Defrost test",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Starting and operating test",
+              [
+                "passed"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "188 %",
+                "140 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "7.10 kW",
+                "5.70 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.77",
+                "3.57"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "6.44 kW",
+                "5.94 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "3.00",
+                "2.15"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "4.32 kW",
+                "3.70 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "4.33",
+                "3.13"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.980",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.89 kW",
+                "1.86 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.35",
+                "5.65"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "6.44 kW",
+                "5.94 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "3.00",
+                "2.15"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "7.10 kW",
+                "5.94 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "3.00",
+                "2.15"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "32 W",
+                "32 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.00 kW",
+                "0.00 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "1988 kWh",
+                "2135 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "152 %",
+                "115 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "7.30 kW",
+                "6.60 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "3.88",
+                "2.96"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-15 °C",
+                "-15 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-22 °C",
+                "-22 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "4.08 kW",
+                "3.74 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "3.00",
+                "2.39"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "2.53 kW",
+                "2.41 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "5.20",
+                "3.68"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.970",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "1.87 kW",
+                "1.85 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.23",
+                "4.70"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.84 kW",
+                "1.81 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.00",
+                "5.49"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "6.03 kW",
+                "5.40 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.38",
+                "1.97"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "5.05 kW",
+                "3.32 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.04",
+                "1.60"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "32 W",
+                "32 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "2.25 kW",
+                "3.28 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "4638 kWh",
+                "5505 kWh"
+              ]
+            ],
+            [
+              "Pdh Tj = -15°C (if TOL<-20°C)",
+              [
+                "6.03",
+                "5.40"
+              ]
+            ],
+            [
+              "COP Tj = -15°C (if TOL<-20°C)",
+              [
+                "2.38",
+                "1.97"
+              ]
+            ],
+            [
+              "Cdh Tj = -15 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "161 %",
+                "131 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "6.60 kW",
+                "6.60 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.11",
+                "3.35"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-7 °C",
+                "-7 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-10 °C",
+                "-10 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "5.45 kW",
+                "5.98 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "2.61",
+                "2.09"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "3.52 kW",
+                "3.55 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "4.17",
+                "3.51"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.980",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "2.22 kW",
+                "2.34 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.15",
+                "4.51"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.960",
+                "0.970"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.85 kW",
+                "1.82 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.09",
+                "5.71"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "5.45 kW",
+                "5.98 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.61",
+                "2.09"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "5.89 kW",
+                "5.25 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.23",
+                "1.77"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "32 W",
+                "32 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.71 kW",
+                "1.35 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "3319 kWh",
+                "4076 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "107 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2.55"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:09 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "85.2 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "235 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "67 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "1.62"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:13 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "120.1 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "235 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "89 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2.04"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "1:41 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "91 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "235 l"
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CS5800iAW 4 OR180 MCP-S",
+      "groups": [
+        {
+          "mode": "General",
+          "title": "Configure model",
+          "rows": [
+            [
+              "Model name",
+              [
+                "CS5800iAW 4 OR180 MCP-S"
+              ]
+            ],
+            [
+              "Application",
+              [
+                "Heating + DHW + low temp"
+              ]
+            ],
+            [
+              "Units",
+              [
+                "Indoor + Outdoor"
+              ]
+            ],
+            [
+              "Climate Zone",
+              [
+                "Colder Climate + Warmer Climate"
+              ]
+            ],
+            [
+              "Reversibility",
+              [
+                "Yes"
+              ]
+            ],
+            [
+              "Cooling mode application (optional)",
+              [
+                "n/a"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "General",
+          "title": "General Data",
+          "rows": [
+            [
+              "Power supply",
+              [
+                "3x400V 50Hz"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-2",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Heat output",
+              [
+                "2.83 kW",
+                "1.97 kW"
+              ]
+            ],
+            [
+              "El input",
+              [
+                "0.59 kW",
+                "0.8 kW"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "4.81",
+                "2.47"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-4",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Shutting off the heat transfer medium flow",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Complete power supply failure",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Defrost test",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Starting and operating test",
+              [
+                "passed"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "178 %",
+                "124 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "4.30 kW",
+                "3.80 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.53",
+                "3.18"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "4.52 kW",
+                "3.82 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "3.36",
+                "2.17"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "2.80 kW",
+                "2.44 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "5.16",
+                "3.10"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.970",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.82 kW",
+                "1.82 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "6.72",
+                "5.00"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "4.52 kW",
+                "3.82 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "3.36",
+                "2.17"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "4.52 kW",
+                "3.82 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "3.36",
+                "2.17"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "14 W",
+                "14 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "33 W",
+                "33 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.00 kW",
+                "0.00 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "1267 kWh",
+                "1596 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "144 %",
+                "99 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "3.80 kW",
+                "3.20 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "3.68",
+                "2.55"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-15 °C",
+                "-15 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-22 °C",
+                "-22 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "2.27 kW",
+                "1.89 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "3.43",
+                "2.27"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.980",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "1.87 kW",
+                "1.76 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "4.60",
+                "2.98"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.970",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "1.60 kW",
+                "1.60 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "5.25",
+                "4.26"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.82 kW",
+                "1.80 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "6.64",
+                "5.23"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "3.14 kW",
+                "2.67 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.52",
+                "1.83"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.24 kW",
+                "2.11 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "1.92",
+                "1.41"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "14 W",
+                "14 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "33 W",
+                "33 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "1.56 kW",
+                "1.09 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "2546 kWh",
+                "3095 kWh"
+              ]
+            ],
+            [
+              "Pdh Tj = -15°C (if TOL<-20°C)",
+              [
+                "3.14",
+                "2.67"
+              ]
+            ],
+            [
+              "COP Tj = -15°C (if TOL<-20°C)",
+              [
+                "2.52",
+                "1.83"
+              ]
+            ],
+            [
+              "Cdh Tj = -15 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "162 %",
+                "121 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "4.40 kW",
+                "4.00 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.14",
+                "3.09"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-7 °C",
+                "-7 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-10 °C",
+                "-10 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "3.93 kW",
+                "3.48 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "2.65",
+                "2.15"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "2.50 kW",
+                "2.17 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "4.50",
+                "3.23"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.970",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "1.65 kW",
+                "1.55 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.00",
+                "4.38"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.97 kW",
+                "1.79 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.44",
+                "5.39"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.950",
+                "0.960"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "3.93 kW",
+                "3.48 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.65",
+                "2.15"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "3.65 kW",
+                "2.95 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.72",
+                "1.82"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "14 W",
+                "14 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "15 W",
+                "15 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "33 W",
+                "33 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.75 kW",
+                "1.05 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "2198 kWh",
+                "2672 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "108 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2.55"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:10 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "87.5 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "71 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "1.71"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:25 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "120.8 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "92 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2.1"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:00 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "89 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CS5800iAW 5 OR180 MCP-S",
+      "groups": [
+        {
+          "mode": "General",
+          "title": "Configure model",
+          "rows": [
+            [
+              "Model name",
+              [
+                "CS5800iAW 5 OR180 MCP-S"
+              ]
+            ],
+            [
+              "Application",
+              [
+                "Heating + DHW + low temp"
+              ]
+            ],
+            [
+              "Units",
+              [
+                "Indoor + Outdoor"
+              ]
+            ],
+            [
+              "Climate Zone",
+              [
+                "Colder Climate + Warmer Climate"
+              ]
+            ],
+            [
+              "Reversibility",
+              [
+                "Yes"
+              ]
+            ],
+            [
+              "Cooling mode application (optional)",
+              [
+                "n/a"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "General",
+          "title": "General Data",
+          "rows": [
+            [
+              "Power supply",
+              [
+                "3x400V 50Hz"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-2",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Heat output",
+              [
+                "2.83 kW",
+                "3.18 kW"
+              ]
+            ],
+            [
+              "El input",
+              [
+                "0.59 kW",
+                "1.18 kW"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "4.81",
+                "2.7"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-4",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Shutting off the heat transfer medium flow",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Complete power supply failure",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Defrost test",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Starting and operating test",
+              [
+                "passed"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "183 %",
+                "139 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "6.40 kW",
+                "5.90 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.65",
+                "3.55"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "2 °C",
+                "2 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "6.43 kW",
+                "5.98 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "2.87",
+                "2.16"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "4.16 kW",
+                "3.87 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "4.24",
+                "3.22"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.980",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.95 kW",
+                "1.81 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.36",
+                "5.33"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "6.43 kW",
+                "5.98 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.87",
+                "2.16"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "6.43 kW",
+                "5.98 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.87",
+                "2.16"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "31 W",
+                "31 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.00 kW",
+                "0.00 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "1837 kWh",
+                "2221 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "162 %",
+                "121 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "5.40 kW",
+                "5.30 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.12",
+                "3.10"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-15 °C",
+                "-15 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-22 °C",
+                "-22 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "3.46 kW",
+                "3.20 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "3.44",
+                "2.65"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.980",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "2.08 kW",
+                "2.12 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "5.47",
+                "3.80"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.960",
+                "0.970"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "1.75 kW",
+                "1.73 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.40",
+                "5.19"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.93 kW",
+                "1.92 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.01",
+                "5.89"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "4.64 kW",
+                "4.33 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.42",
+                "1.92"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "4.04 kW",
+                "3.69 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.11",
+                "1.60"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "31 W",
+                "31 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "1.36 kW",
+                "1.61 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "3232 kWh",
+                "4211 kWh"
+              ]
+            ],
+            [
+              "Pdh Tj = -15°C (if TOL<-20°C)",
+              [
+                "4.64",
+                "4.33"
+              ]
+            ],
+            [
+              "COP Tj = -15°C (if TOL<-20°C)",
+              [
+                "2.42",
+                "1.92"
+              ]
+            ],
+            [
+              "Cdh Tj = -15 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level indoor",
+              [
+                "40 dB(A)",
+                "40 dB(A)"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "42 dB(A)",
+                "42 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "169 %",
+                "130 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "6.20 kW",
+                "6.20 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "4.30",
+                "3.33"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-7 °C",
+                "-7 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-10 °C",
+                "-10 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "5.50 kW",
+                "5.60 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "2.59",
+                "2.01"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "3.06 kW",
+                "3.54 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "4.64",
+                "3.41"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.980",
+                "0.980"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "2.29 kW",
+                "2.24 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.07",
+                "4.85"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.960",
+                "0.970"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.95 kW",
+                "1.90 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "7.23",
+                "5.83"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.940",
+                "0.950"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "5.50 kW",
+                "5.60 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "2.59",
+                "2.01"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "5.47 kW",
+                "5.14 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.40",
+                "1.83"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.990",
+                "0.990"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "16 W",
+                "16 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "31 W",
+                "31 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.73 kW",
+                "1.06 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "2977 kWh",
+                "3851 kWh"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Warmer Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "99 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2.35"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:09 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "86.7 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Colder Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "66 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "1.6"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "2:13 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "121.2 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.3 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 16147",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Declared load profile",
+              [
+                "L"
+              ]
+            ],
+            [
+              "Efficiency ηDHW",
+              [
+                "87 %"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "2"
+              ]
+            ],
+            [
+              "Heating up time",
+              [
+                "1:39 h:min"
+              ]
+            ],
+            [
+              "Standby power input",
+              [
+                "87 W"
+              ]
+            ],
+            [
+              "Reference hot water temperature",
+              [
+                "52.4 °C"
+              ]
+            ],
+            [
+              "Mixed water at 40°C",
+              [
+                "234 l"
+              ]
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "url": "https://www.heatpumpkeymark.com/en/?tx_pskeymark_frontend%5Baction%5D=showSubtype&tx_pskeymark_frontend%5Bcontroller%5D=Frontend&tx_pskeymark_frontend%5Bsubtype%5D=4485&type=109126",
+  "retrieved": "2026-10-27"
+}

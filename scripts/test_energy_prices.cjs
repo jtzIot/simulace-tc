@@ -2,14 +2,16 @@ const fs=require('fs'),path=require('path'),assert=require('node:assert/strict')
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const app=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('let rawWeather'));
 const run=new Function('window','document',app+'\nreturn code => eval(code);')({addEventListener(){}},{});
+assert.equal(run('defaultEnergyConfig().tariff'),'D25d','default tariff is D25d');
+run("window.d02Fixture=function(){const e=defaultEnergyConfig(),t=energyTariffs.D02d;return {...e,tariff:'D02d',supplyVT:t.supplyVT,supplyNT:t.supplyNT,distributionVT:t.distributionVT,distributionNT:t.distributionNT,ntShare:0,breakerFixed:t.breakers[e.breakerIndex]};}");
 const near=(a,b,message)=>assert(Math.abs(a-b)<1e-8,message+': '+a+' vs '+b);
-const e=run('defaultEnergyConfig()'), prices=run('energyPrices(defaultEnergyConfig())');
+const e=run('window.d02Fixture()'), prices=run('energyPrices(window.d02Fixture())');
 near(prices.electricity,5.99805,'D02d components');
 near(prices.gas,1.47815,'GasNet 15–25 MWh');
 near(prices.gasFixed,432.20,'gas standing charges');
 near(prices.fixed,0,'non-heating fixed costs excluded');
 near(prices.averageEl,5.99805,'average includes fixed costs once');
-run("Object.assign(state,{energy:defaultEnergyConfig(),economyPeriod:'season',etsEnabled:false,retainGas:false,hpServiceYearly:0,summerDhwCop:2.7,weatherBaseAltitude:392});recalculateSimulation();");
+run("Object.assign(state,{energy:window.d02Fixture(),economyPeriod:'season',etsEnabled:false,retainGas:false,hpServiceYearly:0,summerDhwCop:2.7,weatherBaseAltitude:211});recalculateSimulation();");
 const before=run("economyFor(simResults['2022-2023'].results,'2022-2023')");
 near(before.hpTotal,before.electricity*prices.electricity+prices.fixed*12*before.fraction,'no double counting');
 run('state.energy.existingConnection=false;applyEnergyPrices()');
@@ -22,14 +24,14 @@ run("Object.assign(state.energy,{...energyTariffs.D57d,tariff:'D57d',breakerFixe
 near(run('state.electricityPrice'),3.78394,'100% NT');
 run('state.energy.ntShare=0;applyEnergyPrices()');
 near(run('state.electricityPrice'),4.63624,'100% VT (component rounding differs from printed total by 0.00001)');
-run('state.energy=defaultEnergyConfig();state.energy.supplyVT=4;applyEnergyPrices()');
+run('state.energy=window.d02Fixture();state.energy.supplyVT=4;applyEnergyPrices()');
 near(run('state.electricityPrice'),6.74805,'custom supply reaches model');
-assert.throws(()=>run('validateEnergyConfig({...defaultEnergyConfig(),annualEl:0})'));
-assert.throws(()=>run('validateEnergyConfig({...defaultEnergyConfig(),gasSupply:-1})'));
-assert.throws(()=>run('validateEnergyConfig({...defaultEnergyConfig(),tariff:"unknown"})'));
+assert.throws(()=>run('validateEnergyConfig({...window.d02Fixture(),annualEl:0})'));
+assert.throws(()=>run('validateEnergyConfig({...window.d02Fixture(),gasSupply:-1})'));
+assert.throws(()=>run('validateEnergyConfig({...window.d02Fixture(),tariff:"unknown"})'));
 assert(!html.includes('Výsledek a jeho podmínky'),'removed card must stay removed');
 assert(html.includes('id="energy-card"'),'energy card exists');
 assert(!/id="energy-card"[^>]*\sopen(?:\s|>)/.test(html),'card starts collapsed');
 console.log('PASS: ČEZ/GasNet components, breaker exclusion, fixed charges, average price, no double counting, VT/NT endpoints, custom prices, validation and collapsed card.');
 
-near(run('energyPrices({...defaultEnergyConfig(),includeOtherFixed:true}).fixed'),0,'legacy flag cannot restore unrelated costs');
+near(run('energyPrices({...window.d02Fixture(),includeOtherFixed:true}).fixed'),0,'legacy flag cannot restore unrelated costs');

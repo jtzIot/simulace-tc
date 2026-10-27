@@ -1,17 +1,17 @@
 # Simulace vytápění TČ a plynem — v3
 
-Interaktivní simulace rodinného domu na deseti historických topných sezónách (říjen–duben, 2014/15–2023/24). Grafy a ekonomické přehledy zobrazují vybrané pětileté okno.
+Interaktivní simulace modelového rodinného domu na historických topných sezónách Open-Meteo ERA5 (říjen–duben, pro Ostravu 1960–2026). Grafy a ekonomické přehledy zobrazují vybrané desetileté okno (výchozích nejnovějších 10 sezón 2016–2026) a modelový rok.
 
 ## Spuštění a sestavení
 
-Otevřete `index.html` nebo původní `Spustit_simulaci.cmd`. Data počasí, model i aplikační JavaScript jsou vloženy v HTML; místní Tailwind a ikony zůstávají součástí projektu. Vyhledávání obcí, nové počasí a externí odkazy vyžadují internet.
+Otevřete `index.html` v prohlížeči. Data počasí, model i aplikační JavaScript jsou vloženy v HTML; místní Tailwind a ikony zůstávají součástí projektu. Vyhledávání obcí, nové počasí a externí odkazy vyžadují internet.
 
 ```powershell
 python scripts/build_full_interactive_app.py
 node scripts/test_model_v3.cjs
 ```
 
-Generátor zapisuje pouze `index.html` v tomto projektu. Už automaticky nepřepisuje kopie v nadřazeném projektu ani v adresáři jiného asistenta.
+Generátor zapisuje výstupní soubor `index.html` v tomto projektu.
 
 - `scripts/build_full_interactive_app.py`: HTML/CSS, původní grafy a meteorologický vstup.
 - `scripts/model-v3.js`: společný fyzikální model a ekonomika.
@@ -22,8 +22,8 @@ Moduly se při sestavení vloží do výsledného HTML. Upravujte zdrojové modu
 
 ## Změny v3
 
-- Všechny čtyři regulátory používají stejnou energetickou bilanci se dvěma teplotními uzly a krokem 10 minut. Zmizelo umělé zvýšení teploty místnosti bez dodané energie.
-- Karty řízení skutečně simulují každou variantu a uvádějí stejnou vybranou sezónu jako hlavní karty. Souhrny jasně označují pětiletý průměr.
+- Oba režimy používají stejnou energetickou bilanci se dvěma teplotními uzly a krokem 10 minut. Zmizelo umělé zvýšení teploty místnosti bez dodané energie.
+- Karty řízení skutečně simulují oba režimy a uvádějí stejnou vybranou sezónu jako hlavní karty. Souhrny jasně označují pětiletý průměr.
 - Sepnutí jsou přechody vypnuto → zapnuto při časovém rozlišení modelu. Provozní hodina se již nevydává za jeden start.
 - Komfort uvádí průměr, minimum, maximum, hodiny a stupňohodiny mimo pásmo; zobrazují se dodané teplo, patrona, změna uložené energie a chyba energetické bilance.
 - TUV má přednost ve výkonové kapacitě; společná patrona je omezena na 3 kW. Případná nedodaná TUV je výslovně vykázána. Volba standardního/poledního ohřevu se respektuje.
@@ -37,11 +37,11 @@ Moduly se při sestavení vloží do výsledného HTML. Upravujte zdrojové modu
 
 ## Interpretace výsledků
 
-Nejde o certifikovaný návrhový software ani validaci konkrétního výrobku. Prediktivní režim je pravidlový regulátor s ideální znalostí budoucí historické teploty, nikoli optimalizační MPC nebo test reálné předpovědi. SG Ready neobsahuje energetickou simulaci FVE.
+Nejde o certifikovaný návrhový software ani validaci konkrétního výrobku. Optimalizace preferuje denní topení 10–16 h s cílem vyššího COP; mimo okno snižuje teplotní cíl a podle potřeby dotápí. Nepoužívá budoucí počasí. Nejde o matematicky zaručené maximum COP.
 
 COP se odvozuje z dosavadního katalogu a modelových korekcí. Certifikáty a hlukové údaje nebyly při této úpravě znovu ověřeny; zdrojové odkazy a omezení jsou přímo v aplikaci. Radiátory předávají teplo do uzlu místnosti bez akumulace v podlaze. Model neřeší detailní hydrauliku, povrchovou teplotu krytiny, odběrové špičky TUV, investice ani budoucí vývoj cen.
 
-Výchozí sezóna 2022/23 v modelu v3: přibližně 3 046 kWh u prediktivního režimu proti 3 160 kWh u referenčního řízení; rozdíl 114 kWh, 3,6 %, při 6 Kč/kWh přibližně 684 Kč. Čísla se změnila opravou modelu; nejsou kalibrována na původní marketingové procento. Současně vždy porovnávejte komfort a dodané teplo.
+Úspory se vždy počítají z aktuálního nastavení. Porovnávejte současně komfort a dodané teplo. Uložené starší režimy se při načtení převedou na denní optimalizaci a přepočítají.
 
 ## Ověření
 
@@ -49,11 +49,21 @@ Testy kontrolují syntaxi sestaveného JavaScriptu, všech deset sezón, zachov�
 
 Nasazení na GitHub Pages je samostatný krok; místní sestavení nic nepublikuje.
 
-## Aktualizace 26. 10. 2026
+Lokální úprava 25. 10. 2026: pouze Základ a Optimalizace · denní topení.
 
-Úvodní srovnání nákladů TČ a plynu, sbalené nastavení domu, editovatelné COP a výkony čerpadla a průběžné změny nákladů. Pouze denní optimalizace; tolerance 0–3 °C pod cílem. Detailní ceníky ČEZ pro elektřinu a plyn, volitelné započtení jističe; ostatní elektrické paušály jsou vyloučeny. Výchozí cenový scénář ETS 2 je zapnutý za 30 €/t CO₂ a lze jej vypnout. Přesné výchozí souřadnice nejsou součástí aplikace.
+Zjednodušení rozhraní: odstraněna celá karta „Výsledek a jeho podmínky“ včetně vložených sekcí. Hlavní výsledky, volby dvou režimů, grafy a srovnání plynu zůstávají. Výpočtový model se tímto krokem nemění.
 
-Sestavení: `python scripts/build_full_interactive_app.py`.
-Kontroly: `node scripts/test_model_v3.cjs`, `node scripts/test_energy_prices.cjs`, `node scripts/test_audit.cjs`.
+## Detailní ceníky energií (lokální úprava 25. 10. 2026)
 
-Vlastní úpravy čerpadla platí pro aktuální otevření stránky. Hodnoty databáze nejsou ověřením skutečného provozu; modelové náklady nezahrnují investici.
+Rozbalovací karta Nastavení energií používá ČEZ Fix na 3 roky, ČEZ Distribuci a GasNet. Výchozí D02d a jistič 3×25 A lze změnit; D57d je dostupná pro srovnání při splnění podmínek distributora. Zadané ceny obsahují DPH. Každá složka ceny i stálých plateb je upravitelná.
+
+Volba „Elektro přípojku stejně používám“ vyřadí pouze jistič. Ostatní elektrické paušály mají samostatný přepínač. Průměr v záhlaví zahrnuje vybrané paušály při referenční roční spotřebě (výchozí elektřina 5 000 kWh, plyn 16 000 kWh). Simulace oceňuje skutečnou spotřebu variabilní cenou a paušály přičítá samostatně. D57d používá nastavitelný podíl spotřeby v NT, výchozích 83,33 % je odhad.
+
+Zdroje: [elektřina od 30. 1. 2026](https://www.cez.cz/webpublic/file/edee/ceniky/moo_ele_cez_fix_na_3_roky_30012026_012026.pdf), [plyn od 17. 4. 2026](https://www.cez.cz/webpublic/file/edee/ceniky/moo_mop_plyn_gasnet_fix_na_3_roky_17042026_012026.pdf). Regulované ceny jsou od 1. 1. 2026. Výběr produktu porovnává standardní nabídky Fix 3 roky, Online 1 rok a Na neurčito; nezahrnuje individuální nabídky ani bonusy.
+
+Implementace: `scripts/energy-prices.js`. Ověření: `node scripts/test_energy_prices.cjs` a `node scripts/test_model_v3.cjs`. Testy cen kontrolují skládání položek, vyloučení jističe, NT/VT, vlastní ceny, validaci a započtení paušálů právě jednou. V prohlížeči ověřeno rozbalení, přepínač jističe a změna D02d/D57d s přepočtem výsledků.
+
+Další lokální úprava: cena ETS 2 přesunuta do rozbalovací karty energií, výchozích 30 €/t CO₂. Jediným volitelným řízením je denní optimalizace; ekviterm zůstává interní referencí úspor. Tolerance 0–3 °C vymezuje pásmo [cíl − tolerance, cíl], včetně grafu a kapacity akumulace. Cíl řízení nikdy nepřekračuje nastavenou teplotu; skutečná teplota může kvůli setrvačnosti či solárním ziskům pásmo překročit. Ověřeny krajní tolerance, bilance všech sezón a ceny.
+
+
+Úprava rozhraní: odstraněna řada šesti souhrnných karet. Nastavení čerpadla je samostatně sbalitelné (výchozí sbalené); COP W35/W55, návrhové výkony a minimální modulace jsou editovatelné. Změny platí v aktuálním otevření stránky a nemění databázi; tlačítko obnoví model. SCOP a referenční údaje TUV zůstávají informativní. V nastavení domu je přichycený přehled aktuálních nákladů a rozdílů vůči referenci; referenci lze nastavit tlačítkem. Ostatní elektrické paušály jsou z výpočtu odstraněny i při načtení staršího nastavení. Jistič a paušály plynu zůstávají. Ověřeno v prohlížeči zvýšení ztráty 5,8 → 7 kW i snížení COP A7W35 5,3 → 4 a okamžitá změna nákladů.

@@ -30,3 +30,7 @@ android/**/build/
 android/local.properties
 *.apk
 *.aab
+
+# Working directory for review update
+review-update/
+

@@ -1,6 +1,80 @@
 import shutil
 import json
 import os
+import re
+from datetime import datetime
+
+def auto_update_version():
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    version_file = os.path.join(root_dir, "version.json")
+    today = datetime.now().strftime("%Y.%m.%d")
+    current_build = 1
+    if os.path.exists(version_file):
+        try:
+            with open(version_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("date") == today:
+                    current_build = data.get("build", 0) + 1
+                else:
+                    current_build = 1
+        except Exception:
+            current_build = 10
+    else:
+        # Check existing version in workspace-ui.js
+        ws_ui_path = os.path.join(os.path.dirname(__file__), "workspace-ui.js")
+        if os.path.exists(ws_ui_path):
+            try:
+                with open(ws_ui_path, "r", encoding="utf-8") as f:
+                    m = re.search(r'VERZE\s+([0-9\.]+)', f.read())
+                    if m:
+                        parts = m.group(1).split('.')
+                        if len(parts) >= 4 and f"{parts[0]}.{parts[1]}.{parts[2]}" == today:
+                            current_build = int(parts[3]) + 1
+                        else:
+                            current_build = 10
+                    else:
+                        current_build = 10
+            except Exception:
+                current_build = 10
+        else:
+            current_build = 10
+
+    version_str = f"{today}.{current_build}"
+    version_data = {
+        "version": version_str,
+        "date": today,
+        "build": current_build,
+        "updatedAt": datetime.now().isoformat()
+    }
+    with open(version_file, "w", encoding="utf-8") as f:
+        json.dump(version_data, f, indent=2)
+
+    # 1. Update scripts/workspace-ui.js
+    ws_ui_path = os.path.join(os.path.dirname(__file__), "workspace-ui.js")
+    if os.path.exists(ws_ui_path):
+        with open(ws_ui_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        content = re.sub(r'SIMULACE VYTÁPĚNÍ RD · VERZE [0-9\.]+', f'SIMULACE VYTÁPĚNÍ RD · VERZE {version_str}', content)
+        with open(ws_ui_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    # 2. Update sw.js cache name
+    sw_path = os.path.join(root_dir, "sw.js")
+    if os.path.exists(sw_path):
+        with open(sw_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        cache_id = f"simulace-tc-{today.replace('.', '')}-v{current_build}"
+        content = re.sub(r"const CACHE_NAME = '[^']+';", f"const CACHE_NAME = '{cache_id}';", content)
+        content = re.sub(r"k\.startsWith\('simulace-[^']*'\)", "k.startsWith('simulace-')", content)
+        with open(sw_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    print(f"Automatic version bump: {version_str} (PWA cache: {cache_id})")
+    return version_str
+
+auto_update_version()
+import json
+import os
 
 WEATHER_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "sim_data", "weather_10_winters.json"))
 
@@ -21,7 +95,7 @@ for s, d in raw_weather.items():
         'sol': sols
     }
 
-weather_json_str = json.dumps(compact_weather)
+weather_json_str = json.dumps(compact_weather, separators=(',', ':'))
 
 html_template = r"""<!DOCTYPE html>
 <html lang="cs" class="dark">
@@ -38,7 +112,7 @@ html_template = r"""<!DOCTYPE html>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <title>Simulace vytápění RD tepelným čerpadlem s akumulací v podlaze (5 sezón, data Open-Meteo)</title>
+  <title>Simulace vytápění RD tepelným čerpadlem s akumulací v podlaze (10 sezón, data Open-Meteo)</title>
   <script src="tailwindcss.min.js"></script>
   <script>window.tailwind || document.write('<script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"><\/script>')</script>
   <style>
@@ -154,7 +228,7 @@ html_template = r"""<!DOCTYPE html>
       <div>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
           <span>⚡ Simulace vytápění RD tepelným čerpadlem</span>
-          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40">5 sezón • Akumulace & TUV • v3.0 · komfort a ověřitelná bilance</span>
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40">10 sezón • Akumulace & TUV • v3.0 · komfort a ověřitelná bilance</span>
         </h1>
         <p class="text-xs text-slate-400 mt-1">
           Fyzikální hodinový model s dynamickým SCOP a ohřevem TUV • Katalog s odkazy na HP Keymark
@@ -167,7 +241,7 @@ html_template = r"""<!DOCTYPE html>
           <input
             type="text"
             id="geo-search-input"
-            placeholder="Hledat obec / město (např. Plzeň, Praha, Brno)..."
+            placeholder="Hledat obec / město (např. Ostrava, Praha, Brno)..."
             oninput="onGeoSearchInput(this.value)"
             class="w-full bg-slate-900 text-white rounded-lg px-3 py-1.5 text-xs border border-slate-700 focus:outline-none focus:border-sky-400 placeholder-slate-500 shadow-inner"
           >
@@ -197,13 +271,13 @@ html_template = r"""<!DOCTYPE html>
     <!-- Active Location Badges Bar -->
     <div class="flex flex-wrap items-center justify-between gap-2 mt-2.5 text-xs text-slate-400">
       <div class="flex flex-wrap items-center gap-2">
-        <span id="badge-location" class="font-semibold text-sky-400 flex items-center gap-1">📍 Modelová lokalita – západní Čechy</span>
-        <span id="badge-altitude" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">⛰️ 392 m n. m.</span>
+        <span id="badge-location" class="font-semibold text-sky-400 flex items-center gap-1">📍 Modelová lokalita – Ostrava</span>
+        <span id="badge-altitude" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">⛰️ 211 m n. m.</span>
         <span id="badge-te-design" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">Výpočtová teplota t_e: -12 °C</span>
         <span id="badge-keymark" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold">Keymark: 011-1W1163 (8,1 kW)</span>
       </div>
       <div id="badge-weather-source" class="text-[11px] text-slate-500">
-        Meteorologická data: Referenční archiv Open-Meteo ERA5 pro západní Čechy; modelový dům
+        Meteorologická data: Referenční archiv Open-Meteo ERA5 pro Ostravu (1960–2026); modelový dům
       </div>
     </div>
 
@@ -247,31 +321,31 @@ html_template = r"""<!DOCTYPE html>
               <span id="val-qloss" class="text-sky-400 font-bold">5.80 kW</span>
             </div>
             <input type="range" id="input-qloss" min="2.0" max="14.0" step="0.1" value="5.8" oninput="onParamChange()" class="w-full mt-1">
-            <div class="text-[10px] text-slate-400">Při výpočtovém mrazu (-12 °C / -15 °C)</div>
+            <div class="text-[10px] text-slate-400">Výkon potřebný k udržení cílové teploty při návrhovém mrazu. Použijte výpočet tepelné ztráty domu.</div>
           </div>
 
           <!-- Otopná soustava (Keymark profil: 35 °C podlaha vs 55 °C radiátory) -->
           <div>
-            <span class="font-medium text-slate-300 block mb-1">Otopná soustava (Keymark):</span>
+            <span class="font-medium text-slate-300 block mb-1">Jak předávám teplo do domu:</span>
             <div class="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700">
-              <button id="btn-sys-floor" onclick="setHeatingSystem('floor')" class="sys-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-bold">
-                🟢 Podlaha (35 °C)
+              <button type="button" id="btn-sys-floor" onclick="setHeatingSystem('floor')" class="sys-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-bold" aria-pressed="true">
+                ♨️ Podlahové topení
               </button>
-              <button id="btn-sys-rad" onclick="setHeatingSystem('radiator')" class="sys-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white">
-                🔴 Radiátory (55 °C)
+              <button type="button" id="btn-sys-rad" onclick="setHeatingSystem('radiator')" class="sys-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white" aria-pressed="false">
+                🪟 Radiátory
               </button>
             </div>
-            <div id="desc-sys-type" class="text-[10px] text-slate-400 mt-1">Nízkoteplotní režim 35 °C dle certifikace Keymark.</div>
+            <div id="desc-sys-type" class="text-[10px] text-slate-400 mt-1">Podlahové topení: model počítá s akumulací potěru. Profil W35 slouží pro parametry TČ; skutečnou teplotu vody nastavíte níže.</div>
           </div>
 
           <!-- Design Flow Temperature (Topná křivka) - allowed from 26.0 °C -->
           <div>
             <div class="flex justify-between font-medium text-slate-300">
-              <span>Návrhová teplota vody:</span>
+              <span>Cílím na teplotu topné vody při návrhovém mrazu:</span>
               <span id="val-tflow" class="text-sky-400 font-bold">28.0 °C</span>
             </div>
             <input type="range" id="input-tflow" min="26.0" max="55.0" step="0.5" value="28.0" oninput="onParamChange()" class="w-full mt-1">
-            <div class="text-[10px] text-slate-400">Výstupní teplota otopné vody při návrhovém mrazu (nastavitelné od 26,0 °C)</div>
+            <div class="text-[10px] text-slate-400">Bod topné křivky při návrhovém mrazu zvolené lokace. Za teplejšího počasí model teplotu snižuje; nejde o stálou teplotu vody. Minimum 26 °C.</div>
           </div>
         </div>
 
@@ -312,16 +386,16 @@ html_template = r"""<!DOCTYPE html>
         <div class="space-y-3 p-3 rounded-lg bg-slate-800/60 border border-slate-700">
           <div>
             <div class="flex justify-between font-medium text-slate-300">
-              <span>Vytápěná plocha podlahy:</span>
+              <span>Vytápěná plocha domu:</span>
               <span id="val-area" class="text-sky-400 font-bold">170 m²</span>
             </div>
             <input type="range" id="input-area" min="80" max="350" step="5" value="170" oninput="onParamChange()" class="w-full mt-1">
-            <div class="text-[10px] text-slate-400">Plocha podlahového vytápění v RD</div>
+            <div class="text-[10px] text-slate-400">Podlahová plocha vytápěných místností, nikoli plocha obálky domu</div>
           </div>
 
           <div>
             <div class="flex justify-between font-medium text-slate-300">
-              <span>Tloušťka potěru:</span>
+              <span>Tloušťka akumulačního potěru:</span>
               <span id="val-thickness" class="text-emerald-400 font-bold">50 mm</span>
             </div>
             <input type="range" id="input-thickness" min="30" max="85" step="5" value="50" oninput="onParamChange()" class="w-full mt-1">
@@ -333,7 +407,7 @@ html_template = r"""<!DOCTYPE html>
 
           <div>
             <div class="flex justify-between font-medium text-slate-300">
-              <span>Cílová teplota & tolerance:</span>
+              <span>Cílová teplota & hystereze (tolerance vychladnutí):</span>
               <span id="val-tin" class="text-amber-400 font-bold">22.0 − 1.0 °C</span>
             </div>
             <div class="grid grid-cols-2 gap-2 mt-1">
@@ -341,7 +415,7 @@ html_template = r"""<!DOCTYPE html>
               <input type="range" id="input-tolerance" min="0" max="3" step="0.1" value="1.0" oninput="onParamChange()" title="Tolerance">
             </div>
             <div class="flex justify-between text-[10px] text-slate-400">
-              <span id="calc-room-corridor">Pásmo: 21,0 – 22,0 °C</span>
+              <span id="calc-room-corridor">Pásmo tolerované teploty (nekomfort): 21,0 – 22,0 °C</span>
               <span id="calc-room-storage" class="text-amber-400 font-semibold">Aku: 11 kWh</span>
             </div>
           </div>
@@ -380,14 +454,14 @@ html_template = r"""<!DOCTYPE html>
               <span class="font-medium text-slate-300 block mb-1">Režim ohřevu TUV:</span>
               <div class="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700">
                 <button id="btn-dhw-smart" onclick="setDhwMode('smart')" class="dhw-mode-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-medium">
-                  ☀️ Polední (12–15h)
+                  ☀️ Polední (13–15h)
                 </button>
                 <button id="btn-dhw-std" onclick="setDhwMode('standard')" class="dhw-mode-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white">
                   🕒 Průběžný
                 </button>
               </div>
               <div id="desc-dhw-mode" class="text-[10px] text-slate-400 mt-1">
-                Ohřev 12:00–15:00 při nejvyšší denní teplotě (vyšší COP a využití FVE).
+                Preferovaný ohřev 13:00–15:00; u dvoutarifu se přesouvá do povolených oken NT. FVE se zde nesimuluje.
               </div>
             </div>
           </div>
@@ -398,9 +472,9 @@ html_template = r"""<!DOCTYPE html>
           <div>
             <div class="flex justify-between font-medium text-slate-300">
               <span>Nadmořská výška:</span>
-              <span id="val-altitude" class="text-sky-400 font-bold">392 m n.m.</span>
+              <span id="val-altitude" class="text-sky-400 font-bold">211 m n.m.</span>
             </div>
-            <input type="range" id="input-altitude" min="150" max="1100" step="1" value="392" oninput="onAltitudeSliderChange()" class="w-full mt-1">
+            <input type="range" id="input-altitude" min="150" max="1100" step="1" value="211" oninput="onAltitudeSliderChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Adiabatická korekce (0,65 °C / 100 m)</div>
           </div>
 
@@ -509,19 +583,16 @@ html_template = r"""<!DOCTYPE html>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div class="flex flex-wrap items-center gap-1.5 bg-slate-900 p-1.5 rounded-xl border border-slate-700 shadow">
       <button id="view-mode-all10" onclick="toggleSection('all10')" class="view-btn active px-3 py-1.5 text-xs rounded-lg transition flex items-center gap-1.5 font-bold shadow bg-sky-600 text-white">
-        <span>📈 1. Srovnání 5 sezón</span>
+        <span>📈 1. Srovnání 10 sezón</span>
       </button>
       <button id="view-mode-single" onclick="toggleSection('single')" class="view-btn active px-3 py-1.5 text-xs rounded-lg transition flex items-center gap-1.5 font-bold shadow bg-sky-600 text-white">
         <span>📅 2. Detail sezóny & Akumulace</span>
       </button>
       <button id="view-mode-table" onclick="toggleSection('table')" class="view-btn active px-3 py-1.5 text-xs rounded-lg transition flex items-center gap-1.5 font-bold shadow bg-sky-600 text-white">
-        <span>📊 3. Tabulka 5 sezón</span>
+        <span>📊 3. Tabulka 10 sezón</span>
       </button>
-      <button id="view-mode-dual" onclick="toggleSection('dual')" class="view-btn px-3 py-1.5 text-xs rounded-lg transition text-slate-300 hover:text-white flex items-center gap-1.5 font-medium bg-slate-800/80">
-        <span>🏷️ 4. Katalog TČ</span>
-      </button>
-      <button id="view-mode-gas" onclick="toggleSection('gas')" class="view-btn px-3 py-1.5 text-xs rounded-lg transition text-slate-300 hover:text-white flex items-center gap-1.5 font-medium bg-slate-800/80">
-        <span>🔥 5. Plyn</span>
+<button id="view-mode-gas" onclick="toggleSection('gas')" class="view-btn px-3 py-1.5 text-xs rounded-lg transition text-slate-300 hover:text-white flex items-center gap-1.5 font-medium bg-slate-800/80">
+        <span>🔥 4. Plyn</span>
       </button>
       <div class="h-4 w-[1px] bg-slate-700 mx-1"></div>
       <button onclick="expandAllSections()" title="Rozbalit všechny sekce pod sebe" class="px-2.5 py-1.5 text-xs rounded-lg bg-sky-950/70 hover:bg-sky-900 text-sky-200 border border-sky-700/60 flex items-center gap-1 font-semibold transition">
@@ -532,21 +603,23 @@ html_template = r"""<!DOCTYPE html>
       </button>
     </div>
 
-    <!-- 5 Seasons Window Selector & Dynamic Season Pills -->
+    <!-- 10 Seasons Window Selector & Dynamic Season Pills -->
     <div id="season-selector-wrapper" class="flex flex-wrap items-center gap-2">
       <div class="flex items-center gap-1.5 bg-slate-900/90 border border-slate-700 px-2.5 py-1 rounded-xl text-xs shadow">
-        <span class="text-slate-400 font-medium">5 sezón okolo roku:</span>
+        <span class="text-slate-400 font-medium">10 sezón okolo roku:</span>
         <select id="select-season-window" onchange="onSeasonPresetChange(this.value)" class="bg-slate-800 text-sky-300 font-bold px-2 py-0.5 rounded border border-slate-600 focus:outline-none text-xs cursor-pointer">
-          <option value="2022">Posledních 5 sezón (2019–2024)</option>
-          <option value="2021">Okolo roku 2021 (2018–2023)</option>
-          <option value="2020">Okolo roku 2020 (2017–2022)</option>
-          <option value="2019">Okolo roku 2019 (2016–2021)</option>
-          <option value="2018">Okolo roku 2018 (2015–2020)</option>
-          <option value="2017">Okolo roku 2017 (2014–2019)</option>
+          <option value="2022" selected>Nejnovějších 10 sezón (2016–2026)</option>
+          <option value="2019">Okolo roku 2019 (2014–2024)</option>
+          <option value="2015">Okolo roku 2015 (2010–2020)</option>
+          <option value="2005">Okolo roku 2005 (2000–2010)</option>
+          <option value="1995">Okolo roku 1995 (1990–2000)</option>
+          <option value="1985">Okolo roku 1985 (1980–1990)</option>
+          <option value="1975">Okolo roku 1975 (1970–1980)</option>
+          <option value="1965">Nejstarších 10 sezón (1960–1970)</option>
         </select>
         <div class="flex items-center gap-0.5 ml-1">
           <button onclick="stepCenterYear(-1)" title="Předchozí rok" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center font-bold text-xs">◀</button>
-          <input type="number" id="input-center-year" min="2016" max="2022" value="2022" onchange="setCenterYear(parseInt(this.value))" class="w-12 bg-slate-800 text-center text-xs text-white font-semibold rounded border border-slate-700 py-0.5">
+          <input type="number" id="input-center-year" min="1960" max="2026" value="2022" onchange="setCenterYear(parseInt(this.value))" class="w-16 bg-slate-800 text-center text-xs text-white font-semibold rounded border border-slate-700 py-0.5">
           <button onclick="stepCenterYear(1)" title="Následující rok" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center font-bold text-xs">▶</button>
         </div>
       </div>
@@ -567,7 +640,7 @@ html_template = r"""<!DOCTYPE html>
         <span class="text-base sm:text-lg">📈</span>
         <div>
           <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <span>1. Srovnání 5 vybraných sezón v grafu</span>
+            <span>1. Srovnání 10 vybraných sezón v grafu</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-950 text-sky-300 border border-sky-800/40 font-normal">1. říjen – 30. duben</span>
           </h2>
           <p class="text-[11px] text-slate-400">Přepínání křivek denní a kumulativní spotřeby elektřiny, COP a venkovní teploty na společné časové ose</p>
@@ -585,10 +658,10 @@ html_template = r"""<!DOCTYPE html>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <h2 class="text-base font-semibold text-white flex items-center gap-2">
-            <span>📈 Srovnání 5 vybraných sezón v grafu (1. říjen – 30. duben)</span>
+            <span>📈 Srovnání 10 vybraných sezón v grafu (1. říjen – 30. duben)</span>
           </h2>
           <p class="text-xs text-slate-400">
-            Srovnání průběhu 5 vybraných otopných sezón na společné časové ose. Najetím myši na křivku nebo v legendě zvýrazníte konkrétní rok.
+            Srovnání průběhu 10 vybraných otopných sezón na společné časové ose. Najetím myši na křivku nebo v legendě zvýrazníte konkrétní rok.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-1.5 text-xs">
@@ -618,7 +691,7 @@ html_template = r"""<!DOCTYPE html>
 
       <!-- 5 Seasons Interactive Legend Bar -->
       <div class="mt-4 pt-3 border-t border-slate-700/60">
-        <div class="text-[11px] font-medium text-slate-400 mb-2">Interaktivní legenda 5 vybraných sezón (kliknutím vyberete detail sezóny, najetím zvýrazníte):</div>
+        <div class="text-[11px] font-medium text-slate-400 mb-2">Interaktivní legenda 10 vybraných sezón (kliknutím vyberete detail sezóny, najetím zvýrazníte):</div>
         <div id="overlay-legend-container" class="flex flex-wrap gap-2"></div>
       </div>
     </div>
@@ -800,7 +873,6 @@ html_template = r"""<!DOCTYPE html>
           <div class="flex flex-wrap items-center gap-3 text-[11px]">
             <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-amber-500 rounded"></span><strong class="text-amber-400">T_podlaha (beton)</strong></span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-emerald-400 rounded"></span><strong class="text-emerald-400">T_místnost (vzduch)</strong></span>
-            <span class="flex items-center gap-1.5"><span class="w-3 h-1 bg-sky-400 rounded"></span><span class="text-sky-300">T_venkovní</span></span>
             <span class="flex items-center gap-1.5"><span class="w-3 h-1 border-t-2 border-dashed border-rose-500"></span><span class="text-rose-400">t_voda (přívod)</span></span>
           </div>
         </div>
@@ -809,6 +881,8 @@ html_template = r"""<!DOCTYPE html>
         </div>
       </div>
 
+      <div class="space-y-2 pt-3"><h3 class="text-sm font-semibold">Graf 1b: Venkovní teplota · 24 hodin (°C)</h3><div class="relative w-full h-[170px] bg-slate-900/40 rounded-lg p-1 border border-slate-800"><canvas id="diurnalOutdoorCanvas" class="w-full h-full block cursor-crosshair"></canvas></div></div>
+      <p class="config-note">HDO: zelený pás = NT, šedý = VT; svislé čáry = přepnutí. Modelový rozvrh, nikoli živý signál distributora. VT samo o sobě neznamená vypnutí kompresoru.</p>
       <!-- Chart 2: Heat Pump Power, Modulation, DHW & Instantaneous COP -->
       <div class="space-y-2 pt-1">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
@@ -894,7 +968,7 @@ html_template = r"""<!DOCTYPE html>
         <span class="text-base sm:text-lg">📊</span>
         <div>
           <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <span>3. Souhrnná srovnávací tabulka 5 vybraných sezón</span>
+            <span>3. Souhrnná srovnávací tabulka 10 vybraných sezón</span>
           </h2>
           <p class="text-[11px] text-slate-400">Podrobný roční přehled spotřeby elektřiny pro topení i TUV, sezónního SCOP, počtu startů a finanční úspory</p>
         </div>
@@ -910,10 +984,10 @@ html_template = r"""<!DOCTYPE html>
     <div class="card p-4 md:p-5">
       <div class="mb-4">
         <h2 class="text-base font-semibold text-white flex items-center gap-2">
-          <span>📊 Souhrnná srovnávací tabulka 5 vybraných sezón</span>
+          <span>📊 Souhrnná srovnávací tabulka 10 vybraných sezón</span>
         </h2>
         <p class="text-xs text-slate-400">
-          Přehled spotřeby elektřiny pro vytápění i TUV, sezónního SCOP, počtu startů kompresoru a finanční úspory v 5 vybraných sezónách.
+          Přehled spotřeby elektřiny pro vytápění i TUV, sezónního SCOP, počtu startů kompresoru a finanční úspory v 10 vybraných sezónách.
         </p>
       </div>
 
@@ -1343,45 +1417,171 @@ html_template = r"""<!DOCTYPE html>
       },
       {
         id: 'gawliczek-10',
-        name: 'Gawliczek Ultra tiché 10 kW (HM-M1-A1)',
+        name: 'Gawliczek / Warmhouse 10 kW R290 Ultra tiché · HM-M1-A1',
         brand: 'Gawliczek / Warmhouse',
         modelCode: 'HM-M1-A1',
         certNo: '011-1W1163',
-        pDesign35: 10.0,
-        pDesign55: 9.2,
+        pDesign35: 7.46,
+        pDesign55: 7.66,
         minMod: 3.0,
-        scop35: 4.58,
-        scop55: 3.40,
-        copDhwRef: 2.45,
-        etaWh: 132,
-        dhwProfile: 'L',
-        noiseDb: '~38-41 dB(A)',
-        refrigerant: 'R290 (Propan)',
-        compressor: 'Panasonic Twin-Rotary Inverter',
-        copA7W35: 5.20, copA2W35: 4.35, copAm7W35: 3.25, copAm15W35: 2.55,
-        copA7W55: 3.30, copA2W55: 2.65, copAm7W55: 2.10, copAm15W55: 1.75,
-        desc: 'Výkonnější 10kW certifikovaná verze Keymark pro domy s tepelnou ztrátou 7 až 10 kW.'
+        scop35: 5.01,
+        scop55: 3.91,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '56 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Panasonic Twin-Rotary Inverter (R290)',
+        copA7W35: 4.96, copA2W35: 4.35, copAm7W35: 3.25, copAm15W35: 2.55,
+        copA7W55: 3.27, copA2W55: 2.65, copAm7W55: 2.10, copAm15W55: 1.75,
+        desc: 'Gawliczek R290 Ultra tiché (Warmhouse HM-M1-A1, Keymark 011-1W1163) s dvouvačkovým kompresorem Panasonic.'
       },
       {
         id: 'gawliczek-12',
-        name: 'Gawliczek Ultra tiché 12 kW (HM-M2-A1)',
+        name: 'Gawliczek / Warmhouse 12 kW R290 Ultra tiché · HM-M2-A1',
         brand: 'Gawliczek / Warmhouse',
         modelCode: 'HM-M2-A1',
         certNo: '011-1W1160',
-        pDesign35: 12.0,
-        pDesign55: 11.0,
+        pDesign35: 10.38,
+        pDesign55: 9.70,
         minMod: 3.5,
-        scop35: 4.52,
-        scop55: 3.35,
-        copDhwRef: 2.40,
-        etaWh: 130,
-        dhwProfile: 'XL',
-        noiseDb: '~40-43 dB(A)',
-        refrigerant: 'R290 (Propan)',
-        compressor: 'Panasonic Twin-Rotary Inverter',
-        copA7W35: 5.10, copA2W35: 4.25, copAm7W35: 3.15, copAm15W35: 2.45,
+        scop35: 5.08,
+        scop55: 3.85,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '58 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Panasonic Twin-Rotary Inverter (R290)',
+        copA7W35: 4.71, copA2W35: 4.25, copAm7W35: 3.15, copAm15W35: 2.45,
         copA7W55: 3.20, copA2W55: 2.55, copAm7W55: 2.05, copAm15W55: 1.70,
-        desc: '12kW monoblok R290 z Keymark databáze pro rozsáhlejší rodinné domy.'
+        desc: 'Gawliczek 12 kW R290 Ultra tiché (Warmhouse HM-M2-A1 / HM-M1S-A2, Keymark 011-1W1160) pro domy s TZ do 10 kW.'
+      },
+      {
+        id: 'gawliczek-16',
+        name: 'Gawliczek / Warmhouse 16,2 kW R290 Ultra tiché · HM-M3-A1',
+        brand: 'Gawliczek / Warmhouse',
+        modelCode: 'HM-M3-A1',
+        certNo: '011-1W1161',
+        pDesign35: 14.53,
+        pDesign55: 13.15,
+        minMod: 4.2,
+        scop35: 5.05,
+        scop55: 4.00,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '61 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Panasonic Twin-Rotary Inverter (R290)',
+        copA7W35: 4.67, copA2W35: 4.10, copAm7W35: 3.10, copAm15W35: 2.40,
+        copA7W55: 3.11, copA2W55: 2.50, copAm7W55: 2.00, copAm15W55: 1.68,
+        desc: 'Gawliczek 16,2 kW R290 Ultra tiché (Warmhouse HM-M3-A1 / HM-M2S-A2, Keymark 011-1W1161) pro domy s TZ do 13–14 kW.'
+      },
+      {
+        id: 'gawliczek-pw-6',
+        name: 'Gawliczek / Power World 6 kW R290 · PW020-DKZLRS-E/S',
+        brand: 'Gawliczek / Power World',
+        modelCode: 'PW020-DKZLRS-E/S',
+        certNo: '041-K032-11 / 02',
+        pDesign35: 4.19,
+        pDesign55: 4.15,
+        minMod: 2.0,
+        scop35: 5.03,
+        scop55: 3.69,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '56 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'HIGHLY (Hitachi) Twin-Rotary DC Inverter',
+        copA7W35: 5.02, copA2W35: 4.20, copAm7W35: 3.20, copAm15W35: 2.55,
+        copA7W55: 3.30, copA2W55: 2.65, copAm7W55: 2.10, copAm15W55: 1.75,
+        desc: 'Gawliczek 6 kW R290 (Power World CleanLife PW020-DKZLRS-E/S, Keymark 041-K032-11) pro nízkoenergetické domy s TZ do 4 kW.'
+      },
+      {
+        id: 'gawliczek-pw-89',
+        name: 'Gawliczek / Power World 8,9 kW R290 · PW030-DKZLRS-E/S',
+        brand: 'Gawliczek / Power World',
+        modelCode: 'PW030-DKZLRS-E/S',
+        certNo: '041-K032-07 / 02',
+        pDesign35: 5.82,
+        pDesign55: 5.59,
+        minMod: 2.8,
+        scop35: 4.64,
+        scop55: 3.48,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '58 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'HIGHLY (Hitachi) Twin-Rotary DC Inverter',
+        copA7W35: 4.90, copA2W35: 4.05, copAm7W35: 3.10, copAm15W35: 2.45,
+        copA7W55: 3.20, copA2W55: 2.60, copAm7W55: 2.05, copAm15W55: 1.70,
+        desc: 'Gawliczek 8,9 kW R290 (Power World CleanLife GW030/PW030-DKZLRS-E/S, Keymark 041-K032-07) pro novostavby s TZ do 6 kW.'
+      },
+      {
+        id: 'gawliczek-pw-114',
+        name: 'Gawliczek / Power World 11,4 kW R290 · PW040-DKZLRS-E/S',
+        brand: 'Gawliczek / Power World',
+        modelCode: 'PW040-DKZLRS-E/S',
+        certNo: '041-K032-08 / 02',
+        pDesign35: 7.89,
+        pDesign55: 8.70,
+        minMod: 3.5,
+        scop35: 4.60,
+        scop55: 3.50,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '59 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'HIGHLY (Hitachi) Twin-Rotary DC Inverter',
+        copA7W35: 4.89, copA2W35: 4.05, copAm7W35: 3.10, copAm15W35: 2.45,
+        copA7W55: 3.20, copA2W55: 2.60, copAm7W55: 2.05, copAm15W55: 1.70,
+        desc: 'Gawliczek 11,4 kW R290 (Power World CleanLife GW040/PW040-DKZLRS-E, Keymark 041-K032-08) pro domy s TZ do 8 kW.'
+      },
+      {
+        id: 'gawliczek-pw-148',
+        name: 'Gawliczek / Power World 14,8 kW R290 · PW050-DKZLRS-E',
+        brand: 'Gawliczek / Power World',
+        modelCode: 'PW050-DKZLRS-E',
+        certNo: '041-K032-09 / 02',
+        pDesign35: 10.27,
+        pDesign55: 12.17,
+        minMod: 4.2,
+        scop35: 4.60,
+        scop55: 3.44,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '61 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'HIGHLY (Hitachi) Twin-Rotary DC Inverter',
+        copA7W35: 4.84, copA2W35: 4.00, copAm7W35: 3.05, copAm15W35: 2.40,
+        copA7W55: 3.15, copA2W55: 2.55, copAm7W55: 2.00, copAm15W55: 1.65,
+        desc: 'Gawliczek 14,8 kW R290 (Power World CleanLife PW050-DKZLRS-E, Keymark 041-K032-09) pro větší domy s TZ do 12 kW.'
+      },
+      {
+        id: 'gawliczek-pw-182',
+        name: 'Gawliczek / Power World 18,2 kW R290 · PW055-DKZLRS-E',
+        brand: 'Gawliczek / Power World',
+        modelCode: 'PW055-DKZLRS-E',
+        certNo: '041-K032-14 / 02',
+        pDesign35: 12.03,
+        pDesign55: 11.94,
+        minMod: 5.0,
+        scop35: 4.68,
+        scop55: 3.60,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '65 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'HIGHLY (Hitachi) Twin-Rotary DC Inverter',
+        copA7W35: 4.85, copA2W35: 4.05, copAm7W35: 3.10, copAm15W35: 2.45,
+        copA7W55: 3.20, copA2W55: 2.60, copAm7W55: 2.05, copAm15W55: 1.70,
+        desc: 'Gawliczek 18,2 kW R290 (Power World CleanLife GW055/PW055-DKZLRS-E, Keymark 041-K032-14) pro velké domy s TZ do 13–15 kW.'
       },
       {
         id: 'viessmann-8',
@@ -1508,16 +1708,103 @@ html_template = r"""<!DOCTYPE html>
         copA7W35: 4.85, copA2W35: 3.95, copAm7W35: 3.00, copAm15W35: 2.40,
         copA7W55: 3.25, copA2W55: 2.60, copAm7W55: 2.00, copAm15W55: 1.65,
         desc: 'Japonská středněteplotní jednotka na R32 pro novostavby i rekonstrukce.'
+      },
+      {
+        id: 'gree-versati-8',
+        name: 'Gree Versati 8 kW R290 · GRS-CQ8Pd/NpG4-E',
+        brand: 'Gree Electric Appliances',
+        modelCode: 'GRS-CQ8Pd/NpG4-E',
+        certNo: '041-K004-34',
+        pDesign35: 8.0,
+        pDesign55: 7.0,
+        minMod: 2.0,
+        scop35: 5.13,
+        scop55: 3.88,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '56 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Gree G-Force Two-Stage Inverter (R290)',
+        copA7W35: 5.00, copA2W35: 4.91, copAm7W35: 3.03, copAm15W35: 2.50,
+        copA7W55: 3.60, copA2W55: 4.04, copAm7W55: 2.32, copAm15W55: 1.80,
+        desc: 'Gree Versati monobloc 8 kW R290 (GRS-CQ8Pd/NpG4-E, certifikát Keymark 041-K004-34) s ekologickým chladivem R290.'
+      },
+      {
+        id: 'gree-versati-10',
+        name: 'Gree Versati 10 kW R290 · GRS-CQ10PD/NPG4-E',
+        brand: 'Gree Electric Appliances',
+        modelCode: 'GRS-CQ10PD/NPG4-E',
+        certNo: '041-K004-34',
+        pDesign35: 9.0,
+        pDesign55: 8.0,
+        minMod: 2.3,
+        scop35: 4.93,
+        scop55: 3.88,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '56 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Gree G-Force Two-Stage Inverter (R290)',
+        copA7W35: 4.75, copA2W35: 4.71, copAm7W35: 2.84, copAm15W35: 2.45,
+        copA7W55: 3.30, copA2W55: 4.04, copAm7W55: 2.25, copAm15W55: 1.80,
+        desc: 'Gree Versati monobloc 10 kW R290 (GRS-CQ10PD/NPG4-E, certifikát Keymark 041-K004-34) s ekologickým chladivem R290.'
+      },
+      {
+        id: 'gree-versati-6',
+        name: 'Gree Versati V 6 kW R290 · GRS-CQ6.0Pd/NpG4-E',
+        brand: 'Gree Electric Appliances',
+        modelCode: 'GRS-CQ6.0Pd/NpG4-E',
+        certNo: '011-1W1085',
+        pDesign35: 6.0,
+        pDesign55: 6.0,
+        minMod: 1.8,
+        scop35: 5.18,
+        scop55: 3.88,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '54 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Gree Inverter Twin-Rotary (R290)',
+        copA7W35: 5.00, copA2W35: 5.05, copAm7W35: 3.20, copAm15W35: 2.50,
+        copA7W55: 3.70, copA2W55: 3.80, copAm7W55: 2.55, copAm15W55: 1.85,
+        desc: 'Gree Versati V Monobloc 6 kW R290 (GRS-CQ6.0Pd/NpG4-E, certifikát Keymark 011-1W1085) s nízkou hladinou hluku.'
+      },
+      {
+        id: 'gree-versati-4',
+        name: 'Gree Versati V 4 kW R290 · GRS-CQ4.0Pd/NpG4-E',
+        brand: 'Gree Electric Appliances',
+        modelCode: 'GRS-CQ4.0Pd/NpG4-E',
+        certNo: '011-1W1085',
+        pDesign35: 5.0,
+        pDesign55: 5.0,
+        minMod: 1.5,
+        scop35: 5.13,
+        scop55: 3.88,
+        copDhwRef: null,
+        etaWh: null,
+        dhwProfile: 'Viz přesná sestava ve zdroji',
+        noiseDb: '54 dB(A) LWA',
+        refrigerant: 'R290',
+        compressor: 'Gree Inverter Twin-Rotary (R290)',
+        copA7W35: 5.20, copA2W35: 4.91, copAm7W35: 3.42, copAm15W35: 2.50,
+        copA7W55: 3.70, copA2W55: 3.77, copAm7W55: 2.60, copAm15W55: 1.85,
+        desc: 'Gree Versati V Monobloc 4 kW R290 (GRS-CQ4.0Pd/NpG4-E, certifikát Keymark 011-1W1085) pro nízkoenergetické domy.'
       }
     ];
 
-    // Application state (Calibrated with Screenshot Defaults)
+    // Application state (Model House Defaults)
     let state = {
       // 5 Seasons Windowing
       centerYear: 2022,
+      economyPeriod: 'annual',
       currentSeason: '2022-2023',
       hoverSeason: null,
       selectedDayIndex: 98,       // Selected day for 24-hour diurnal profile (default coldest day)
+      control: {policy:'day',dayStart:10,dayEnd:16,setback:0.65,blockCompressor:false,dhwNT:true},
+      gasDhwEfficiency:86,
       automationLevel: 'optimized', // baseline or optimized
 
       // Active Keymark Model & System Type
@@ -1538,10 +1825,10 @@ html_template = r"""<!DOCTYPE html>
       singleMetric: 'el',         // 'el', 'scop', 'temp'
 
       // Location & Weather Source:
-      locationName: 'Modelová lokalita – západní Čechy',
+      locationName: 'Modelová lokalita – Ostrava',
       lat: null,
       lon: null,
-      altitude: 392,              // m n.m.
+      altitude: 211,              // m n.m.
       tExtDesign: -12.0,          // °C
       isCustomWeatherLoaded: false,
 
@@ -1570,65 +1857,76 @@ html_template = r"""<!DOCTYPE html>
       gasBoilerServiceYearly: 1500// Kč/rok
     };
 
-    // Color palette for seasons
-    const seasonColors = {
-      '2014-2015': '#38bdf8', // sky
-      '2015-2016': '#34d399', // emerald
-      '2016-2017': '#f87171', // red (coldest)
-      '2017-2018': '#fbbf24', // amber
-      '2018-2019': '#c084fc', // purple
-      '2019-2020': '#a78bfa', // violet
-      '2020-2021': '#f472b6', // pink
-      '2021-2022': '#2dd4bf', // teal
-      '2022-2023': '#fb923c', // orange
-      '2023-2024': '#60a5fa'  // blue
-    };
+    // Color palette for seasons (1960–2026)
+    const seasonPalette = ['#38bdf8', '#34d399', '#f87171', '#fbbf24', '#c084fc', '#a78bfa', '#f472b6', '#2dd4bf', '#fb923c', '#60a5fa'];
+    const seasonColors = {};
+    for (let y = 1960; y <= 2026; y++) {
+      seasonColors[`${y}-${y + 1}`] = seasonPalette[(y - 1960) % seasonPalette.length];
+    }
 
     // Cache of simulation results
     let simResults = {};
 
-    // 5-Season Windowing Helper: returns exactly 5 seasons based on state.centerYear
-    function getActiveSeasons() {
-      const allSeasons = Object.keys(simResults);
-      if (allSeasons.length <= 5) return allSeasons;
-
-      const cy = state.centerYear;
-      if (cy >= 2022) {
-        return allSeasons.slice(-5);
-      }
-      if (cy <= 2016) {
-        return allSeasons.slice(0, 5);
-      }
-
-      // Map center year to 5 consecutive seasons
-      const targetSeason = `${cy - 1}-${cy}`;
-      let idx = allSeasons.indexOf(targetSeason);
-      if (idx === -1) idx = allSeasons.findIndex(s => s.startsWith(`${cy}`));
-      if (idx === -1) idx = 2;
-
-      let startIdx = Math.max(0, idx - 2);
-      if (startIdx + 5 > allSeasons.length) startIdx = allSeasons.length - 5;
-      return allSeasons.slice(startIdx, startIdx + 5);
+    function getDatabaseYearBounds() {
+      const keys = Object.keys(rawWeather || {}).sort();
+      if (!keys.length) return [1960, 2026];
+      const minYr = Math.max(1960, Number(keys[0].slice(0, 4)));
+      const maxYr = Math.min(2026, Number(keys[keys.length - 1].slice(5)));
+      return [minYr, maxYr];
     }
 
-    // Season Stepper & Preset Controls
+    // 10-Season Windowing Helper: returns 10 seasons around state.centerYear from database
+    function getActiveSeasons() {
+      const source = (typeof rawWeather === 'object' && rawWeather && Object.keys(rawWeather).length) ? rawWeather : simResults;
+      const allSeasons = Object.keys(source).sort();
+      if (allSeasons.length <= 10) return allSeasons;
+
+      const cy = Number.isFinite(state.centerYear) ? state.centerYear : 2022;
+      let idx = allSeasons.findIndex(s => Number(s.slice(0, 4)) >= cy);
+      if (idx === -1) idx = allSeasons.length - 1;
+
+      let startIdx = Math.max(0, Math.min(allSeasons.length - 10, idx - 5));
+      return allSeasons.slice(startIdx, startIdx + 10);
+    }
+
+    // Season Stepper & Preset Controls (1960–2026 if in database)
     function setCenterYear(yr) {
       if (isNaN(yr)) return;
-      const clamped = Math.max(2016, Math.min(2022, yr));
+      const [minDb, maxDb] = (state.isCustomWeatherLoaded && Number.isFinite(state.lat) && Number.isFinite(state.lon)) ? [1960, 2026] : getDatabaseYearBounds();
+      const clamped = Math.max(minDb, Math.min(maxDb, yr));
       state.centerYear = clamped;
 
       const inp = document.getElementById('input-center-year');
-      if (inp) inp.value = clamped;
+      if (inp) {
+        inp.min = String(minDb);
+        inp.max = String(maxDb);
+        inp.value = clamped;
+      }
+
+      if (state.isCustomWeatherLoaded && Number.isFinite(state.lat) && Number.isFinite(state.lon)) {
+        const startYr = Math.max(1960, Math.min(2016, clamped - 5));
+        if (!rawWeather[`${startYr}-${startYr + 1}`] || !rawWeather[`${startYr + 9}-${startYr + 10}`]) {
+          downloadLocationWeather();
+          return;
+        }
+      }
+
+      recalculateSimulation();
+      const active10 = getActiveSeasons();
+      if (!active10.includes(state.currentSeason)) {
+        state.currentSeason = active10[Math.floor(active10.length / 2)] || active10[0];
+      }
 
       const sel = document.getElementById('select-season-window');
       if (sel) {
-        const opt = sel.querySelector(`option[value="${clamped}"]`);
-        if (opt) sel.value = clamped;
-      }
-
-      const active5 = getActiveSeasons();
-      if (!active5.includes(state.currentSeason)) {
-        state.currentSeason = active5[2] || active5[0];
+        let opt = sel.querySelector(`option[value="${clamped}"]`);
+        if (!opt) {
+          opt = sel.querySelector('option[data-custom="1"]');
+          if (!opt) { opt = document.createElement('option'); opt.dataset.custom = '1'; sel.prepend(opt); }
+          opt.value = String(clamped);
+          opt.textContent = `Okolo roku ${clamped} (${active10[0]?.slice(0,4)||''}–${active10.at(-1)?.slice(5)||''})`;
+        }
+        sel.value = String(clamped);
       }
 
       renderSeasonPills();
@@ -1746,7 +2044,9 @@ html_template = r"""<!DOCTYPE html>
       badge.innerText = '0 %';
 
       try {
-        const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${state.lat}&longitude=${state.lon}&start_date=2014-10-01&end_date=2024-04-30&hourly=temperature_2m,relative_humidity_2m,direct_normal_irradiance,diffuse_radiation&timezone=auto`;
+        const startYr = Math.max(1960, Math.min(2016, (state.centerYear || 2022) - 5));
+        const endYr = startYr + 10;
+        const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${state.lat}&longitude=${state.lon}&start_date=${startYr}-10-01&end_date=${endYr}-04-30&hourly=temperature_2m,relative_humidity_2m,direct_normal_irradiance,diffuse_radiation&timezone=auto`;
         const resp = await fetch(url);
         if (!resp.ok) throw new Error('Chyba při stahování dat');
         const archiveJson = await resp.json();
@@ -1754,7 +2054,7 @@ html_template = r"""<!DOCTYPE html>
         badge.innerText = '100 %';
         text.innerText = 'Zpracovávám hodinová data...';
 
-        const parsedSeasons = parseArchiveToSeasons(archiveJson);
+        const parsedSeasons = parseArchiveToSeasons(archiveJson, startYr, endYr);
         rawWeather = parsedSeasons;
         state.isCustomWeatherLoaded = true; state.weatherBaseAltitude = state.altitude;
 
@@ -1777,19 +2077,19 @@ html_template = r"""<!DOCTYPE html>
       }
     }
 
-    function parseArchiveToSeasons(archiveData) {
+    function parseArchiveToSeasons(archiveData, startYr = null, endYr = null) {
       const times = archiveData.hourly.time;
       const temps = archiveData.hourly.temperature_2m;
       const rhs = archiveData.hourly.relative_humidity_2m;
       const dnis = archiveData.hourly.direct_normal_irradiance || [];
       const diffs = archiveData.hourly.diffuse_radiation || [];
 
+      const firstYr = startYr ?? parseInt(times[0].substring(0, 4), 10);
+      const lastYr = endYr ?? parseInt(times[times.length - 1].substring(0, 4), 10);
       const seasons = {};
-      const seasonKeys = [
-        '2014-2015', '2015-2016', '2016-2017', '2017-2018', '2018-2019',
-        '2019-2020', '2020-2021', '2021-2022', '2022-2023', '2023-2024'
-      ];
-      seasonKeys.forEach(s => { seasons[s] = { start: '', t: [], rh: [], sol: [] }; });
+      for (let y = firstYr; y < lastYr; y++) {
+        seasons[`${y}-${y + 1}`] = { start: '', t: [], rh: [], sol: [] };
+      }
 
       for (let i = 0; i < times.length; i++) {
         const tStr = times[i];
@@ -1832,26 +2132,35 @@ html_template = r"""<!DOCTYPE html>
     // System Type Switcher (Floor 35 °C vs Radiators 55 °C)
     function setHeatingSystem(sys) {
       state.heatingSystem = sys;
+      const isFloor = sys === 'floor';
       const btnFloor = document.getElementById('btn-sys-floor');
       const btnRad = document.getElementById('btn-sys-rad');
       const desc = document.getElementById('desc-sys-type');
       const tflowInput = document.getElementById('input-tflow');
+      const tflowNumber = document.getElementById('input-tflow-number');
 
-      if (sys === 'floor') {
-        if (btnFloor) btnFloor.className = "sys-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-bold";
-        if (btnRad) btnRad.className = "sys-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white";
-        if (desc) desc.innerText = "Nízkoteplotní režim 35 °C dle certifikace Keymark (ideální pro podlahovku, vysoký COP).";
+      if (btnFloor) {
+        btnFloor.className = `sys-btn ${isFloor ? 'active' : ''} py-1 px-1.5 rounded text-[11px] transition text-center ${isFloor ? 'font-bold' : 'text-slate-300 hover:text-white'}`.trim();
+        btnFloor.setAttribute('aria-pressed', String(isFloor));
+      }
+      if (btnRad) {
+        btnRad.className = `sys-btn ${!isFloor ? 'active' : ''} py-1 px-1.5 rounded text-[11px] transition text-center ${!isFloor ? 'font-bold' : 'text-slate-300 hover:text-white'}`.trim();
+        btnRad.setAttribute('aria-pressed', String(!isFloor));
+      }
+
+      if (isFloor) {
+        if (desc) desc.innerText = "Podlahové topení: model počítá s akumulací potěru. Katalogový profil W35 slouží pro parametry TČ; skutečnou teplotu vody nastavíte níže.";
         if (state.tFlowDesign > 38.0) {
           state.tFlowDesign = 28.0;
           if (tflowInput) tflowInput.value = 28.0;
+          if (tflowNumber) tflowNumber.value = 28.0;
         }
       } else {
-        if (btnFloor) btnFloor.className = "sys-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white";
-        if (btnRad) btnRad.className = "sys-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-bold";
-        if (desc) desc.innerText = "Středněteplotní režim 55 °C dle certifikace Keymark (vyšší výstupní teplota pro radiátory, nižší COP).";
+        if (desc) desc.innerText = "Radiátory: teplo jde přímo do místnosti, bez akumulace potěru. Profil W55 slouží pro parametry TČ; skutečnou teplotu vody nastavíte níže.";
         if (state.tFlowDesign < 45.0) {
           state.tFlowDesign = 50.0;
           if (tflowInput) tflowInput.value = 50.0;
+          if (tflowNumber) tflowNumber.value = 50.0;
         }
       }
       onParamChange();
@@ -1862,7 +2171,7 @@ __MODEL_V3__
 
     function computeMonthly(dailyList, seasonKey) {
       const months = ['Říjen', 'Listopad', 'Prosinec', 'Leden', 'Únor', 'Březen', 'Duben'];
-      const isLeap = seasonKey === '2015-2016' || seasonKey === '2019-2020' || seasonKey === '2023-2024';
+      const endYr = Number((seasonKey || '').slice(5)); const isLeap = endYr % 4 === 0 && (endYr % 100 !== 0 || endYr % 400 === 0);
       const mLens = [31, 30, 31, 31, isLeap ? 29 : 28, 31, 30];
 
       const res = [];
@@ -1884,7 +2193,7 @@ __MODEL_V3__
           el_std: elStd,
           th_opt: thOpt,
           scop_opt: elOpt > 0 ? thOpt / elOpt : 0,
-          savings_czk: (elStd - elOpt) * state.electricityPrice
+          savings_czk: slice.reduce((a,d)=>a+(d.cost_std-d.cost_opt),0)
         });
       }
       return res;
@@ -1955,7 +2264,7 @@ __MODEL_V3__
         if (mode === 'smart') {
           btnSmart.className = "dhw-mode-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-medium";
           btnStd.className = "dhw-mode-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white";
-          if (desc) desc.innerText = "Ohřev 12:00–15:00 při nejvyšší denní teplotě (vyšší COP a využití FVE).";
+          if (desc) desc.innerText = "Preferovaný ohřev 13:00–15:00; u dvoutarifu se přesouvá do povolených oken NT. FVE se zde nesimuluje.";
         } else {
           btnSmart.className = "dhw-mode-btn py-1 px-1.5 rounded text-[11px] transition text-center text-slate-300 hover:text-white";
           btnStd.className = "dhw-mode-btn active py-1 px-1.5 rounded text-[11px] transition text-center font-medium";
@@ -2046,7 +2355,7 @@ __MODEL_V3__
 
       document.getElementById('calc-floor-mass').innerText = `Hmotnost: ${massTons.toFixed(1).replace('.', ',')} tun`;
       document.getElementById('calc-floor-c').innerText = `C: ${cKwhK.toFixed(1).replace('.', ',')} kWh/K`;
-      document.getElementById('calc-room-corridor').innerText = `Pásmo: ${tMinRoom} – ${tMaxRoom} °C`;
+      document.getElementById('calc-room-corridor').innerText = `Pásmo tolerované teploty (nekomfort): ${tMinRoom} – ${tMaxRoom} °C`;
       document.getElementById('calc-room-storage').innerText = `Aku: ${Math.round(storageKwh)} kWh`;
 
       // Summary Cards:
@@ -2108,7 +2417,17 @@ __MODEL_V3__
       document.getElementById('input-tin').value = 22.0;
       document.getElementById('input-tolerance').value = 1.0;
       document.getElementById('input-price').value = 6.0;
-      document.getElementById('input-altitude').value = 392;
+      document.getElementById('input-altitude').value = 211;
+      state.altitude = 211;
+      state.weatherBaseAltitude = 211;
+      state.locationName = 'Modelová lokalita – Ostrava';
+      state.lat = null;
+      state.lon = null;
+      state.isCustomWeatherLoaded = false;
+      if (typeof originalWeatherV3 !== 'undefined') rawWeather = originalWeatherV3;
+      if (document.getElementById('badge-location')) document.getElementById('badge-location').innerText = '📍 Modelová lokalita – Ostrava';
+      if (document.getElementById('badge-altitude')) document.getElementById('badge-altitude').innerText = '⛰️ 211 m n. m.';
+      if (document.getElementById('badge-weather-source')) document.getElementById('badge-weather-source').innerText = 'Meteorologická data: Referenční archiv Open-Meteo ERA5 pro Ostravu (1960–2026); modelový dům';
 
       document.getElementById('input-dhw-enabled').checked = true;
       document.getElementById('input-dhw-liters').value = 120;
@@ -2120,11 +2439,12 @@ __MODEL_V3__
       document.getElementById('input-gas-eff').value = 94;
       document.getElementById('input-hp-service').value = 0;
 
+      state.economyPeriod = 'annual';
       state.heatingSystem = 'floor';
       setFloorMaterial('beton');
       setFloorCovering('vinyl');
       setDhwMode('smart');
-      selectKeymarkModel('gawliczek-81');
+      selectKeymarkModel('warmhouse-hm-m0-a1-keymark1325');
       setCenterYear(2022);
       onParamChange();
     }
@@ -2179,11 +2499,11 @@ __MODEL_V3__
     }
 
     function expandAllSections() {
-      ['all10', 'single', 'table', 'dual', 'gas'].forEach(m => toggleSection(m, true));
+      ['all10', 'single', 'table', 'gas'].forEach(m => toggleSection(m, true));
     }
 
     function collapseAllSections() {
-      ['all10', 'single', 'table', 'dual', 'gas'].forEach(m => toggleSection(m, false));
+      ['all10', 'single', 'table', 'gas'].forEach(m => toggleSection(m, false));
     }
 
     function setViewMode(mode) {
@@ -2232,7 +2552,7 @@ __MODEL_V3__
         btn.className = 'auto-level-btn p-3 rounded-lg border text-left ' + (l === level ? 'active border-sky-400 bg-sky-950/60' : 'border-slate-700 bg-slate-800/80');
         btn.setAttribute('aria-pressed', String(l === level));
       });
-      document.getElementById('badge-auto-level').textContent = level === 'baseline' ? 'Základ · stálý ekviterm' : 'Optimalizace · denní topení';
+      document.getElementById('badge-auto-level').textContent = level === 'baseline' ? 'Základ · stálý ekviterm' : controlLabel();
       recalculateSimulation();
       updateUI();
     }
@@ -2333,9 +2653,9 @@ __MODEL_V3__
       container.innerHTML = `
         <div class="card p-3.5 border-sky-500/30">
           <div class="flex items-center justify-between text-xs text-slate-400">
-            <span class="font-semibold text-white">${state.automationLevel === 'baseline' ? 'Základ · ekviterm' : 'Optimalizace · denní topení'}</span>
+            <span class="font-semibold text-white">${state.automationLevel === 'baseline' ? 'Základ · ekviterm' : controlLabel()}</span>
             <span class="text-[10px] px-1.5 py-0.2 rounded ${state.automationLevel === 'baseline' ? 'bg-slate-800 text-slate-400' : 'bg-sky-950 text-sky-300'} font-bold">
-              ${state.automationLevel === 'baseline' ? 'stálý cíl 24 h' : 'priorita 10–16 h'}
+              ${state.automationLevel === 'baseline' ? 'stálý cíl 24 h' : controlWindowLabel()}
             </span>
           </div>
           <div class="text-2xl font-bold text-white mt-1">${Math.round(r.el_opt_kwh).toLocaleString('cs-CZ')} <span class="text-sm font-normal text-slate-400">kWh</span></div>
@@ -2348,7 +2668,7 @@ __MODEL_V3__
             <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">stálý cíl</span>
           </div>
           <div class="text-2xl font-bold text-slate-300 mt-1">${Math.round(r.el_std_kwh).toLocaleString('cs-CZ')} <span class="text-sm font-normal text-slate-400">kWh</span></div>
-          <div class="text-[11px] text-slate-400 mt-1">Stálý 24h ekviterm + ranní/večerní TUV</div>
+          <div class="text-[11px] text-slate-400 mt-1">Stálý cíl + TUV podle dostupných tarifních oken</div>
         </div>
 
         <div class="card p-3.5 ${state.automationLevel === 'baseline' ? 'border-slate-700 bg-slate-900/40' : 'border-emerald-500/30 bg-emerald-950/20'}">
@@ -2362,7 +2682,7 @@ __MODEL_V3__
             ${state.automationLevel === 'baseline' ? '0' : `${Math.round(r.diff_kwh).toLocaleString('cs-CZ')}`} <span class="text-sm font-normal text-slate-400">kWh</span>
           </div>
           <div class="text-[11px] ${state.automationLevel === 'baseline' ? 'text-slate-400' : 'text-emerald-300 font-semibold'} mt-1">
-            ${state.automationLevel === 'baseline' ? 'Základní referenční provoz (žádná úspora)' : `Úspora: ${Math.round(r.savings_czk).toLocaleString('cs-CZ')} Kč (denní topení; dle simulace)`}
+            ${state.automationLevel === 'baseline' ? 'Základní referenční provoz (žádná úspora)' : `Úspora: ${Math.round(r.savings_czk).toLocaleString('cs-CZ')} Kč (zvolené řízení; dle simulace)`}
           </div>
         </div>
 
@@ -2976,6 +3296,7 @@ __MODEL_V3__
       if (elSavingEl) elSavingEl.innerHTML = `Úspora dne: <strong>${diffEl.toFixed(1)} kWh (${diffPct.toFixed(0)} %)</strong> • SCOP ${day.scop_day.toFixed(2)}`;
 
       // 3. Render Canvas Charts
+      drawDiurnalOutdoorCanvas(activeDiurnalHoverHour);
       drawDiurnalTempCanvas(activeDiurnalHoverHour);
       drawDiurnalPowerCanvas(activeDiurnalHoverHour);
     }
@@ -3008,46 +3329,22 @@ __MODEL_V3__
       // Determine Temperature Range
       let minT = 99, maxT = -99;
       hours.forEach(h => {
-        if (h.te < minT) minT = h.te;
+        
         if (h.tr < minT) minT = h.tr;
         if (h.tf < minT) minT = h.tf;
-        if (h.te > maxT) maxT = h.te;
+        
         if (h.tr > maxT) maxT = h.tr;
         if (h.tf > maxT) maxT = h.tf;
         if (h.tfl !== null && h.tfl > maxT) maxT = h.tfl;
       });
       minT = Math.floor(minT - 1.5);
       maxT = Math.ceil(maxT + 1.5);
-      if (maxT - minT < 12) maxT = minT + 12;
+      if (maxT - minT < 3) maxT = minT + 3;
 
       const yT = (val) => padT + cH - ((val - minT) / (maxT - minT)) * cH;
-      const xH = (h) => padL + (h / 23) * cW;
+      const xH = (h) => padL + (h / 24) * cW;
 
-      // 1. Shaded Operational Regions
-      // Night setback (00:00 - 06:00)
-      const x0 = padL;
-      const x6 = xH(6);
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
-      ctx.fillRect(x0, padT, x6 - x0, cH);
-
-      // Midday charging (10:00 - 16:00)
-      const x10 = xH(10);
-      const x16 = xH(16);
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
-      ctx.fillRect(x10, padT, x16 - x10, cH);
-
-      // Evening setback (22:00 - 23:00)
-      const x22 = xH(22);
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
-      ctx.fillRect(x22, padT, padL + cW - x22, cH);
-
-      // Region Labels
-      ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
-      ctx.font = '10px system-ui';
-      ctx.textAlign = 'left';
-      ctx.fillText('🌙 Noční útlum', x0 + 6, padT + 12);
-      ctx.fillText('☀️ Polední nabíjení (max COP & TUV)', x10 + 6, padT + 12);
-
+      drawDailySchedule(ctx,padL,padT,cW,cH);
       // 2. Indoor Room Comfort Corridor Shading
       const yComfTop = yT(state.tInTarget);
       const yComfBot = yT(state.tInTarget - state.tTolerance);
@@ -3110,17 +3407,6 @@ __MODEL_V3__
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // 5. Outdoor Ambient Temp Wave T_ext (Sky Blue)
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2.0;
-      ctx.beginPath();
-      hours.forEach((h, i) => {
-        const x = xH(i);
-        const y = yT(h.te);
-        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-
       // 6. Floor Slab Core Temp T_floor (Warm Amber/Orange - Thick Curve with Dots)
       ctx.strokeStyle = '#f97316';
       ctx.lineWidth = 3.0;
@@ -3156,7 +3442,7 @@ __MODEL_V3__
       ctx.fillStyle = '#94a3b8';
       ctx.font = '10px system-ui';
       ctx.textAlign = 'center';
-      const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 23];
+      const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 24];
       tickHours.forEach(h => {
         const x = xH(h);
         ctx.fillText(`${String(h).padStart(2, '0')}:00`, x, padT + cH + 16);
@@ -3224,24 +3510,11 @@ __MODEL_V3__
       maxKw = Math.max(6.0, Math.ceil((maxKw * 1.25) / 2) * 2);
 
       const yKw = (kw) => padT + cH - (kw / maxKw) * cH;
-      const yCop = (c) => padT + cH - (Math.max(0, c) / 6.0) * cH;
-      const xH = (h) => padL + (h / 23) * cW;
+      const maxCop=Math.max(6,Math.ceil(Math.max(...hours.map(h=>h.cop_opt||0))));
+      const yCop = (c) => padT + cH - (Math.max(0, c) / maxCop) * cH;
+      const xH = (h) => padL + (h / 24) * cW;
 
-      // 1. Shaded Operational Regions matching Canvas 1
-      const x0 = padL;
-      const x6 = xH(6);
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
-      ctx.fillRect(x0, padT, x6 - x0, cH);
-
-      const x10 = xH(10);
-      const x16 = xH(16);
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
-      ctx.fillRect(x10, padT, x16 - x10, cH);
-
-      const x22 = xH(22);
-      ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
-      ctx.fillRect(x22, padT, padL + cW - x22, cH);
-
+      drawDailySchedule(ctx,padL,padT,cW,cH);
       // 2. Gridlines for kW (Left)
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 1;
@@ -3261,7 +3534,7 @@ __MODEL_V3__
       }
 
       // 3. Right Y-Axis: Okamžitý COP (0 - 6.0)
-      for (let c = 2.0; c <= 6.0; c += 1.0) {
+      for (let c = 2.0; c <= maxCop; c += 1.0) {
         const y = yCop(c);
         ctx.fillStyle = 'rgba(16, 185, 129, 0.8)';
         ctx.font = '10px system-ui';
@@ -3328,7 +3601,7 @@ __MODEL_V3__
       ctx.fillStyle = '#94a3b8';
       ctx.font = '10px system-ui';
       ctx.textAlign = 'center';
-      const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 23];
+      const tickHours = [0, 3, 6, 9, 12, 15, 18, 21, 24];
       tickHours.forEach(h => {
         const x = xH(h);
         ctx.fillText(`${String(h).padStart(2, '0')}:00`, x, padT + cH + 16);
@@ -3417,7 +3690,7 @@ __MODEL_V3__
         const trAvg = document.createElement('tr');
         trAvg.className = "bg-slate-800/80 font-bold border-t-2 border-slate-700 text-white";
         trAvg.innerHTML = `
-          <td class="py-3 px-3">5letý průměr</td>
+          <td class="py-3 px-3">${cnt}letý průměr</td>
           <td class="py-3 px-2 text-right">${avgTe.toFixed(1)} °C</td>
           <td class="py-3 px-2 text-right">${Math.round(avgTh).toLocaleString('cs-CZ')} kWh</td>
           <td class="py-3 px-2 text-right text-slate-400">${Math.round(avgStd).toLocaleString('cs-CZ')}</td>
@@ -3427,7 +3700,7 @@ __MODEL_V3__
           <td class="py-3 px-2 text-right text-emerald-400">${avgScop.toFixed(2)}</td>
           <td class="py-3 px-2 text-right text-slate-300">–</td>
           <td class="py-3 px-2 text-right text-slate-300">–</td>
-          <td class="py-3 px-2 text-right">${avgStarts.toLocaleString('cs-CZ')}</td>
+          <td class="py-3 px-2 text-right">${nfmt(avgStarts,2)}</td>
         `;
         tbody.appendChild(trAvg);
       }
@@ -3692,11 +3965,11 @@ __MODEL_V3__
       if (!container) return;
       container.innerHTML = '';
 
-      let list = keymarkDatabase;
+      let list = keymarkDatabase.filter(h=>h.selectable!==false);
       if (state.keymarkFilter === 'r290') {
         list = list.filter(x => x.refrigerant.includes('R290'));
       } else if (state.keymarkFilter === 'gawliczek') {
-        list = list.filter(x => x.brand.toLowerCase().includes('gawliczek') || x.brand.toLowerCase().includes('warmhouse'));
+        list = list.filter(x => x.brand.toLowerCase().includes('gawliczek') || x.brand.toLowerCase().includes('warmhouse') || x.brand.toLowerCase().includes('power world'));
       }
 
       if (query && query.trim().length > 0) {
@@ -3735,7 +4008,7 @@ __MODEL_V3__
             </div>
             <div class="bg-slate-900/80 p-1.5 rounded">
               <div class="text-[10px] text-slate-400">TUV COP</div>
-              <div class="font-bold text-amber-400 text-xs">${item.copDhwRef} (${item.etaWh}%)</div>
+              <div class="font-bold text-amber-400 text-xs">${item.copDhwRef??'—'} (${item.etaWh??'—'}%)</div>
             </div>
             <div class="bg-slate-900/80 p-1.5 rounded">
               <div class="text-[10px] text-slate-400">Hluk dB(A)</div>
@@ -3759,13 +4032,13 @@ __MODEL_V3__
       if (elDesc) elDesc.innerText = `Certifikát Keymark: ${hp.certNo} • Model: ${hp.modelCode} • Chladivo: ${hp.refrigerant} • Hluk: ${hp.noiseDb}`;
       if (elScop35) elScop35.innerText = hp.scop35;
       if (elScop55) elScop55.innerText = hp.scop55;
-      if (elCopTuv) elCopTuv.innerText = `${hp.copDhwRef} (${hp.etaWh} %)`;
+      if (elCopTuv) elCopTuv.innerText = `${hp.copDhwRef??'—'} (${hp.etaWh??'—'} %)`;
 
       const container = document.getElementById('keymark-catalog-grid');
       if (!container) return;
       container.innerHTML = '';
 
-      keymarkDatabase.forEach(item => {
+      keymarkDatabase.filter(h=>h.selectable!==false).forEach(item => {
         const isSelected = state.activeModelId === item.id;
         const card = document.createElement('div');
         card.className = `p-4 rounded-xl border flex flex-col justify-between transition ${
@@ -3795,7 +4068,7 @@ __MODEL_V3__
               </div>
               <div class="bg-slate-950 p-1.5 rounded">
                 <div class="text-[10px] text-slate-400">TUV COP</div>
-                <div class="text-xs font-bold text-amber-400">${item.copDhwRef} (${item.etaWh}%)</div>
+                <div class="text-xs font-bold text-amber-400">${item.copDhwRef??'—'} (${item.etaWh??'—'}%)</div>
               </div>
             </div>
 
@@ -3854,7 +4127,7 @@ __MODEL_V3__
               if (state.overlayMetric === 'temp') return `${d.avg_t.toFixed(1)} °C`;
               const cumArr = simResults[seasonKey]?.cum_kwh;
               const cum = cumArr ? Math.round(cumArr[Math.min(dayIdx, cumArr.length - 1)] || 0) : 0;
-              return `${cum.toLocaleString('cs-CZ')} kWh`;
+              return `${nfmt(cum,2)} kWh`;
             };
 
             let rows = active5.map(s => {
@@ -3961,6 +4234,7 @@ __MODEL_V3__
             drawSingleSeasonChart();
             updateDiurnalView();
 
+            if(typeof selectAnalysisView==='function')selectAnalysisView('day');
             const diurnalCard = document.getElementById('diurnal-section-card');
             if (diurnalCard) {
               diurnalCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -3976,7 +4250,7 @@ __MODEL_V3__
       function handleDiurnalMove(canvas, e) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
-        const padL = 40, padR = 40;
+        const padL = 40, padR = canvas.id==='diurnalPowerCanvas'?40:25;
         const cW = rect.width - padL - padR;
 
         const cur = simResults[state.currentSeason];
@@ -3985,9 +4259,10 @@ __MODEL_V3__
         if (!day || !day.hours) return;
 
         if (mouseX >= padL && mouseX <= rect.width - padR) {
-          const h = Math.min(23, Math.max(0, Math.round(((mouseX - padL) / cW) * 23)));
+          const h = Math.min(23, Math.max(0, Math.floor(((mouseX - padL) / cW) * 24)));
           activeDiurnalHoverHour = h;
-          drawDiurnalTempCanvas(h);
+          drawDiurnalOutdoorCanvas(h);
+      drawDiurnalTempCanvas(h);
           drawDiurnalPowerCanvas(h);
 
           const hData = day.hours[h];
@@ -4003,14 +4278,15 @@ __MODEL_V3__
               <span>${statusText}</span>
             </div>
             <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
-              <div>Venkovní teplota: <strong class="text-sky-300">${hData.te} °C</strong></div>
-              <div>Teplota podlahy: <strong class="text-amber-400">${hData.tf} °C</strong></div>
-              <div>Vnitřní teplota: <strong class="text-emerald-400">${hData.tr} °C</strong></div>
-              <div>Otopná voda: <strong class="${hData.tfl !== null ? 'text-rose-400' : 'text-slate-400'}">${hData.tfl !== null ? (hData.tfl + ' °C') : 'Vypnuto (0 °C)'}</strong></div>
-              <div class="border-t border-slate-700/60 pt-1 mt-0.5">Výkon TČ do podlahy: <strong class="text-sky-300">${hData.q_hp} kW</strong></div>
-              <div class="border-t border-slate-700/60 pt-1 mt-0.5">Ohřev TUV: <strong class="text-amber-300">${hData.q_dhw > 0 ? (hData.q_dhw + ' kW') : '0 kW'}</strong></div>
-              <div>Příkon elektřiny Smart: <strong class="text-purple-300">${hData.p_el_opt} kW</strong></div>
-              <div>Příkon Ekviterm: <strong class="text-slate-400">${hData.p_el_std} kW</strong></div>
+              <div class="col-span-2">HDO: ${hdoHourDescription(h)}</div>
+              <div>Venkovní teplota: <strong class="text-sky-300">${nfmt(hData.te,2)} °C</strong></div>
+              <div>Teplota podlahy: <strong class="text-amber-400">${nfmt(hData.tf,2)} °C</strong></div>
+              <div>Vnitřní teplota: <strong class="text-emerald-400">${nfmt(hData.tr,2)} °C</strong></div>
+              <div>Otopná voda: <strong class="${hData.tfl !== null ? 'text-rose-400' : 'text-slate-400'}">${hData.tfl !== null ? (nfmt(hData.tfl,2) + ' °C') : 'Vypnuto (0 °C)'}</strong></div>
+              <div class="border-t border-slate-700/60 pt-1 mt-0.5">Výkon TČ do podlahy: <strong class="text-sky-300">${nfmt(hData.q_hp,2)} kW</strong></div>
+              <div class="border-t border-slate-700/60 pt-1 mt-0.5">Ohřev TUV: <strong class="text-amber-300">${hData.q_dhw > 0 ? (nfmt(hData.q_dhw,2) + ' kW') : '0 kW'}</strong></div>
+              <div>Příkon elektřiny Smart: <strong class="text-purple-300">${nfmt(hData.p_el_opt,2)} kW</strong></div>
+              <div>Příkon Ekviterm: <strong class="text-slate-400">${nfmt(hData.p_el_std,2)} kW</strong></div>
               <div class="col-span-2 border-t border-slate-700/60 pt-1 text-emerald-400 font-bold">
                 Okamžitý COP: ${hData.cop_opt.toFixed(2)} ${!hData.isRunning ? '<span class="text-slate-400 font-normal text-[10px]">(při stávající venkovní teplotě)</span>' : ''}
               </div>
@@ -4027,7 +4303,8 @@ __MODEL_V3__
       function handleDiurnalLeave() {
         activeDiurnalHoverHour = null;
         tooltip.style.display = 'none';
-        drawDiurnalTempCanvas(null);
+        drawDiurnalOutdoorCanvas(null);
+      drawDiurnalTempCanvas(null);
         drawDiurnalPowerCanvas(null);
       }
 
@@ -4040,6 +4317,9 @@ __MODEL_V3__
         dpCanvas.addEventListener('mouseleave', handleDiurnalLeave);
       }
 
+      const outdoorCanvas=document.getElementById('diurnalOutdoorCanvas');
+      outdoorCanvas?.addEventListener('mousemove',e=>handleDiurnalMove(outdoorCanvas,e));
+      outdoorCanvas?.addEventListener('mouseleave',handleDiurnalLeave);
       // Gas Bar Chart Tooltip
       const gasCanvas = document.getElementById('gasComparisonCanvas');
       if (gasCanvas) {
@@ -4082,7 +4362,7 @@ __MODEL_V3__
     function getDayDateString(dayIdx) {
       const cur = simResults[state.currentSeason];
       if (!cur) return `Den ${dayIdx + 1}`;
-      const isLeap = state.currentSeason === '2015-2016' || state.currentSeason === '2019-2020' || state.currentSeason === '2023-2024';
+      const endYr = Number((state.currentSeason || '').slice(5)); const isLeap = endYr % 4 === 0 && (endYr % 100 !== 0 || endYr % 400 === 0);
       const mLens = [31, 30, 31, 31, isLeap ? 29 : 28, 31, 30];
       const mNames = ['října', 'listopadu', 'prosince', 'ledna', 'února', 'března', 'dubna'];
 
@@ -4105,6 +4385,10 @@ __MODEL_V3__
 
 __REVIEW_V3__
 __ENERGY_PRICES__
+__TARIFF_CONTROL__
+__KEYMARK_CATALOG__
+__HP_KEYMARK__
+__WORKSPACE_UI__
     window.onload = init;
   </script>
 </body>
@@ -4112,7 +4396,7 @@ __ENERGY_PRICES__
 """
 
 # Inline the maintained model and UI modules so index.html remains offline-capable.
-for marker, filename in [('__MODEL_V3__', 'model-v3.js'), ('__REVIEW_V3__', 'review-ui-v3.js'), ('__ENERGY_PRICES__', 'energy-prices.js')]:
+for marker, filename in [('__MODEL_V3__', 'model-v3.js'), ('__REVIEW_V3__', 'review-ui-v3.js'), ('__ENERGY_PRICES__', 'energy-prices.js'), ('__TARIFF_CONTROL__', 'tariff-control.js'), ('__KEYMARK_CATALOG__', 'keymark-catalog-data.js'), ('__HP_KEYMARK__', 'hp-keymark.js'), ('__WORKSPACE_UI__', 'workspace-ui.js')]:
     with open(os.path.join(os.path.dirname(__file__), filename), encoding='utf-8') as module:
         html_template = html_template.replace(marker, module.read())
 

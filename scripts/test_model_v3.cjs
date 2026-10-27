@@ -5,7 +5,7 @@ scripts.forEach(s=>new vm.Script(s));
 assert.equal((html.match(/id="btn-auto-/g)||[]).length,1,'only optimized controller visible');
 const app=scripts.find(s=>s.includes('let rawWeather'));
 const run=new Function('window','document',app+'\nreturn code => eval(code);')({addEventListener(){}},{});
-run("Object.assign(state,{economyPeriod:'season',etsEnabled:false,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7,weatherBaseAltitude:392}); recalculateSimulation();");
+run("Object.assign(state,{economyPeriod:'season',etsEnabled:false,retainGas:false,gasMonthlyFixed:135,elMonthlyExtra:0,summerDhwCop:2.7,weatherBaseAltitude:211}); recalculateSimulation();");
 const results=run('simResults');
 assert.deepEqual(Array.from(run('controllerLevels')), ['baseline','optimized']);
 for(const r of Object.values(results)) for(const h of r.results.comfort.opt.hours) {

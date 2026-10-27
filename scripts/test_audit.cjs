@@ -3,7 +3,11 @@ const html=fs.readFileSync(require('path').join(__dirname,'../index.html'),'utf8
 const app=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('let rawWeather'));
 const run=new Function('window','document',app+'\nreturn code=>eval(code)')({addEventListener(){}},{});
 const near=(a,b,msg)=>assert(Math.abs(a-b)<1e-7,msg+': '+a+' != '+b);
-run(`Object.assign(state,{energy:defaultEnergyConfig(),economyPeriod:'season',etsEnabled:false,retainGas:false,summerDhwCop:2.7,weatherBaseAltitude:392});recalculateSimulation()`);
+assert.equal(run('state.economyPeriod'),'annual','default economy period is annual');
+assert.equal(run('state.locationName'),'Modelová lokalita – Ostrava','default location is Ostrava');
+assert.equal(run('state.altitude'),211,'default altitude is 211 m');
+assert.deepEqual(run('getActiveSeasons()'),['2016-2017','2017-2018','2018-2019','2019-2020','2020-2021','2021-2022','2022-2023','2023-2024','2024-2025','2025-2026'],'default newest 10 seasons');
+run(`Object.assign(state,{energy:defaultEnergyConfig(),economyPeriod:'season',etsEnabled:false,retainGas:false,summerDhwCop:2.7,weatherBaseAltitude:211});recalculateSimulation()`);
 const snapshot=run('({state,simResults,rawWeather})');
 let worstBalance=0;
 for(const [season,x] of Object.entries(snapshot.simResults)) {
@@ -12,7 +16,7 @@ for(const [season,x] of Object.entries(snapshot.simResults)) {
  const yearDays=year%4===0&&(year%100!==0||year%400===0)?366:365, fraction=days/yearDays;
  const gas=r.th_opt_heat/(st.gasBoilerEfficiency/100)+r.th_opt_dhw/0.86;
  near(c.gasKwh,gas,'gas conversion');
- near(c.hpTotal,r.el_opt_kwh*5.99805+(st.hpServiceYearly)*fraction,'independent electricity invoice');
+ near(c.hpTotal,r.comfort.opt.elVT*6.32843+r.comfort.opt.elNT*3.50394+(15.73*12+st.hpServiceYearly)*fraction,'independent electricity invoice');
  near(c.gasTotal,gas*1.47815+(432.20*12+st.gasBoilerServiceYearly)*fraction,'independent gas invoice');
  near(c.saving,c.gasTotal-c.hpTotal,'saving');
  near(r.scop_opt,r.th_kwh/r.el_opt_kwh,'SCOP must be ratio of energies');
@@ -28,7 +32,7 @@ for(const [season,x] of Object.entries(snapshot.simResults)) {
  run('state.retainGas=false');
 }
 assert.equal(run('state.lat'),null);assert.equal(run('state.lon'),null);
-assert(!/RD_Letkov|Users[\\/]+jtz|lat: 49\.73|lon: 13\.46/.test(html),'no original site coordinates or personal paths in delivered HTML');
+assert(!/[A-Z]:\\\\Users\\\\|file:\/\/\/[A-Za-z]:/i.test(html),'no local user file paths in delivered HTML');
 assert(html.indexOf('id="gas-overview"')<html.indexOf('<header'),'comparison first');
 assert(html.includes('cez.cz/webpublic/file/edee/ceniky/'),'CEZ sources preserved');
 console.log('PASS: independent invoices for 10 seasons, leap years, SCOP, heat totals, ETS, retained gas, anonymous HTML and comparison placement. Maximum energy balance residual: '+worstBalance+' kWh');

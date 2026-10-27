@@ -1,0 +1,386 @@
+{
+  "meta": {
+    "Certificate Holder": "Power World Machinery Equipment Co. Ltd.   \r\n            No.24, the fourth industrial zone  \r\n            \r\n            BaoAn District Shenzhen  \r\n            China",
+    "Registration number": "041-K032-11\r\n            \r\n                / 02",
+    "Refrigerant": "R290",
+    "Mass of Refrigerant": "0,500 kg",
+    "Certification Date": "14.08.2026",
+    "Testing laboratory": "TÜV SÜD Certification and Testing Co., Ltd. Guangzhou Branch, CN"
+  },
+  "models": [
+    {
+      "name": "PW020-DKZLRS-E/S",
+      "groups": [
+        {
+          "mode": "General",
+          "title": "Configure model",
+          "rows": [
+            [
+              "Model name",
+              [
+                "PW020-DKZLRS-E/S"
+              ]
+            ],
+            [
+              "Application",
+              [
+                "Heating (medium temp)"
+              ]
+            ],
+            [
+              "Units",
+              [
+                "Outdoor"
+              ]
+            ],
+            [
+              "Climate Zone",
+              [
+                "n/a"
+              ]
+            ],
+            [
+              "Reversibility",
+              [
+                "Yes"
+              ]
+            ],
+            [
+              "Cooling mode application (optional)",
+              [
+                "n/a"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "General",
+          "title": "General Data",
+          "rows": [
+            [
+              "Power supply",
+              [
+                "1x230V 50Hz"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-2",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Heat output",
+              [
+                "4.02 kW",
+                "4.03 kW"
+              ]
+            ],
+            [
+              "El input",
+              [
+                "0.86 kW",
+                "1.30 kW"
+              ]
+            ],
+            [
+              "COP",
+              [
+                "4.68",
+                "3.09"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Heating",
+          "title": "EN 14511-4",
+          "rows": [
+            [
+              "",
+              [
+                ""
+              ]
+            ],
+            [
+              "Shutting off the heat transfer medium flow",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Complete power supply failure",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Defrost test",
+              [
+                "passed"
+              ]
+            ],
+            [
+              "Starting and operating test",
+              [
+                "passed"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 12102-1",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "Sound power level outdoor",
+              [
+                "49 dB(A)",
+                "49 dB(A)"
+              ]
+            ]
+          ]
+        },
+        {
+          "mode": "Average Climate",
+          "title": "EN 14825",
+          "rows": [
+            [
+              "",
+              [
+                "Low temperature",
+                "Medium temperature"
+              ]
+            ],
+            [
+              "η s",
+              [
+                "198 %",
+                "145 %"
+              ]
+            ],
+            [
+              "Prated",
+              [
+                "4.19 kW",
+                "4.15 kW"
+              ]
+            ],
+            [
+              "SCOP",
+              [
+                "5.03",
+                "3.69"
+              ]
+            ],
+            [
+              "Tbiv",
+              [
+                "-7 °C",
+                "-7 °C"
+              ]
+            ],
+            [
+              "TOL",
+              [
+                "-10 °C",
+                "-10 °C"
+              ]
+            ],
+            [
+              "Pdh Tj = -7°C",
+              [
+                "3.71 kW",
+                "3.68 kW"
+              ]
+            ],
+            [
+              "COP Tj = -7°C",
+              [
+                "3.26",
+                "2.44"
+              ]
+            ],
+            [
+              "Cdh Tj = -7 °C",
+              [
+                "0.900",
+                "0.900"
+              ]
+            ],
+            [
+              "Pdh Tj = +2°C",
+              [
+                "2.25 kW",
+                "2.21 kW"
+              ]
+            ],
+            [
+              "COP Tj = +2°C",
+              [
+                "4.79",
+                "3.57"
+              ]
+            ],
+            [
+              "Cdh Tj = +2 °C",
+              [
+                "0.900",
+                "0.900"
+              ]
+            ],
+            [
+              "Pdh Tj = +7°C",
+              [
+                "1.59 kW",
+                "1.48 kW"
+              ]
+            ],
+            [
+              "COP Tj = +7°C",
+              [
+                "6.83",
+                "4.95"
+              ]
+            ],
+            [
+              "Cdh Tj = +7 °C",
+              [
+                "0.900",
+                "0.900"
+              ]
+            ],
+            [
+              "Pdh Tj = 12°C",
+              [
+                "1.85 kW",
+                "1.79 kW"
+              ]
+            ],
+            [
+              "COP Tj = 12°C",
+              [
+                "9.28",
+                "6.96"
+              ]
+            ],
+            [
+              "Cdh Tj = +12 °C",
+              [
+                "0.900",
+                "0.900"
+              ]
+            ],
+            [
+              "Pdh Tj = Tbiv",
+              [
+                "3.71 kW",
+                "3.68 kW"
+              ]
+            ],
+            [
+              "COP Tj = Tbiv",
+              [
+                "3.26",
+                "2.44"
+              ]
+            ],
+            [
+              "Pdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "4.05 kW",
+                "3.94 kW"
+              ]
+            ],
+            [
+              "COP Tj = TOL or COP Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "2.98",
+                "2.14"
+              ]
+            ],
+            [
+              "Cdh Tj = TOL or Pdh Tj = Tdesignh if TOL < Tdesignh",
+              [
+                "0.900",
+                "0.900"
+              ]
+            ],
+            [
+              "WTOL",
+              [
+                "75 °C",
+                "75 °C"
+              ]
+            ],
+            [
+              "Poff",
+              [
+                "9 W",
+                "9 W"
+              ]
+            ],
+            [
+              "PTO",
+              [
+                "9 W",
+                "9 W"
+              ]
+            ],
+            [
+              "PSB",
+              [
+                "9 W",
+                "9 W"
+              ]
+            ],
+            [
+              "PCK",
+              [
+                "41 W",
+                "41 W"
+              ]
+            ],
+            [
+              "Supplementary Heater: Type of energy input",
+              [
+                "Electricity",
+                "Electricity"
+              ]
+            ],
+            [
+              "Supplementary Heater: PSUP",
+              [
+                "0.14 kW",
+                "0.21 kW"
+              ]
+            ],
+            [
+              "Annual energy consumption Qhe",
+              [
+                "1721 kWh",
+                "2327 kWh"
+              ]
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "url": "https://www.heatpumpkeymark.com/en/?tx_pskeymark_frontend%5Baction%5D=showSubtype&tx_pskeymark_frontend%5Bcontroller%5D=Frontend&tx_pskeymark_frontend%5Bsubtype%5D=6304&type=109126",
+  "retrieved": "2026-10-27"
+}

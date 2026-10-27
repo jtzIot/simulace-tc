@@ -1,7 +1,7 @@
 {
   "name": "Simulace vytápění TČ s akumulací",
   "short_name": "Simulace TČ",
-  "description": "Fyzikální simulace vytápění RD tepelným čerpadlem s akumulací v podlaze pro 10 let zimních dat (2014-2024)",
+  "description": "Fyzikální simulace vytápění modelového RD tepelným čerpadlem a plynovým kotlem (data Open-Meteo ERA5 1960–2026)",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",

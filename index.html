@@ -221,7 +221,7 @@
               <span>Tepelná ztráta domu:</span>
               <span id="val-qloss" class="text-sky-400 font-bold">5.80 kW</span>
             </div>
-            <input type="range" id="input-qloss" min="2.0" max="14.0" step="0.1" value="5.8" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-qloss" min="2.0" max="14.0" step="0.1" value="5.8" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Výkon potřebný k udržení cílové teploty při návrhovém mrazu. Použijte výpočet tepelné ztráty domu.</div>
           </div>
 
@@ -245,7 +245,7 @@
               <span>Cílím na teplotu topné vody při návrhovém mrazu:</span>
               <span id="val-tflow" class="text-sky-400 font-bold">28.0 °C</span>
             </div>
-            <input type="range" id="input-tflow" min="26.0" max="55.0" step="0.5" value="28.0" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-tflow" min="26.0" max="55.0" step="0.5" value="28.0" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Bod topné křivky při návrhovém mrazu zvolené lokace. Za teplejšího počasí model teplotu snižuje; nejde o stálou teplotu vody. Minimum 26 °C.</div>
           </div>
         </div>
@@ -290,7 +290,7 @@
               <span>Vytápěná plocha domu:</span>
               <span id="val-area" class="text-sky-400 font-bold">170 m²</span>
             </div>
-            <input type="range" id="input-area" min="80" max="350" step="5" value="170" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-area" min="80" max="350" step="5" value="170" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Podlahová plocha vytápěných místností, nikoli plocha obálky domu</div>
           </div>
 
@@ -299,7 +299,7 @@
               <span>Tloušťka akumulačního potěru:</span>
               <span id="val-thickness" class="text-emerald-400 font-bold">50 mm</span>
             </div>
-            <input type="range" id="input-thickness" min="30" max="85" step="5" value="50" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-thickness" min="30" max="85" step="5" value="50" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="flex justify-between text-[10px] text-slate-400">
               <span id="calc-floor-mass">Hmotnost: 20,0 tun</span>
               <span id="calc-floor-c">C: 5,7 kWh/K</span>
@@ -312,8 +312,8 @@
               <span id="val-tin" class="text-amber-400 font-bold">22.0 − 1.0 °C</span>
             </div>
             <div class="grid grid-cols-2 gap-2 mt-1">
-              <input type="range" id="input-tin" min="19.0" max="23.5" step="0.5" value="22.0" oninput="onParamChange()" title="Cílová teplota">
-              <input type="range" id="input-tolerance" min="0" max="3" step="0.1" value="1.0" oninput="onParamChange()" title="Tolerance">
+              <input type="range" id="input-tin" min="19.0" max="23.5" step="0.5" value="22.0" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" title="Cílová teplota">
+              <input type="range" id="input-tolerance" min="0" max="3" step="0.1" value="1.0" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" title="Tolerance">
             </div>
             <div class="flex justify-between text-[10px] text-slate-400">
               <span id="calc-room-corridor">Pásmo tolerované teploty (nekomfort): 21,0 – 22,0 °C</span>
@@ -338,7 +338,7 @@
                 <span>Denní spotřeba TUV:</span>
                 <span id="val-dhw-liters" class="text-sky-400 font-bold">120 l/den</span>
               </div>
-              <input type="range" id="input-dhw-liters" min="60" max="350" step="10" value="120" oninput="onParamChange()" class="w-full mt-1">
+              <input type="range" id="input-dhw-liters" min="60" max="350" step="10" value="120" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
               <div id="desc-dhw-persons" class="text-[10px] text-slate-400">cca 3 osoby (40 l/osoba/den při 55 °C)</div>
             </div>
 
@@ -347,7 +347,7 @@
                 <span>Požadovaná teplota TUV:</span>
                 <span id="val-dhw-temp" class="text-sky-400 font-bold">55 °C</span>
               </div>
-              <input type="range" id="input-dhw-temp" min="45" max="60" step="1" value="55" oninput="onParamChange()" class="w-full mt-1">
+              <input type="range" id="input-dhw-temp" min="45" max="60" step="1" value="55" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
               <div class="text-[10px] text-slate-400">Teplota v zásobníku (výstup TČ cca +3 °C)</div>
             </div>
 
@@ -375,7 +375,7 @@
               <span>Nadmořská výška:</span>
               <span id="val-altitude" class="text-sky-400 font-bold">211 m n.m.</span>
             </div>
-            <input type="range" id="input-altitude" min="150" max="1100" step="1" value="211" oninput="onAltitudeSliderChange()" class="w-full mt-1">
+            <input type="range" id="input-altitude" min="150" max="1100" step="1" value="211" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="onAltitudeSliderChange(true)" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Adiabatická korekce (0,65 °C / 100 m)</div>
           </div>
 
@@ -384,7 +384,7 @@
               <span>Cena elektřiny:</span>
               <span id="val-price" class="text-rose-400 font-bold">6.00 Kč/kWh</span>
             </div>
-            <input type="range" id="input-price" min="0" max="1000" step="0.00001" value="6.0" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-price" min="0" max="1000" step="0.00001" value="6.0" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Včetně distribuce, POZE, daně a DPH</div>
           </div>
 
@@ -393,7 +393,7 @@
               <span>Roční kontrola TČ:</span>
               <span id="val-hp-service" class="text-emerald-400 font-bold">0 Kč/rok</span>
             </div>
-            <input type="range" id="input-hp-service" min="0" max="3500" step="100" value="0" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-hp-service" min="0" max="3500" step="100" value="0" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Zadejte náklady údržby a kontrol podle nabídky dodavatele</div>
           </div>
         </div>
@@ -405,7 +405,7 @@
               <span>Cena plynu:</span>
               <span id="val-gas-price" class="text-amber-400 font-bold">1.60 Kč/kWh</span>
             </div>
-            <input type="range" id="input-gas-price" min="0" max="1000" step="0.00001" value="1.60" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-gas-price" min="0" max="1000" step="0.00001" value="1.60" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Včetně komodity, distribuce a DPH</div>
           </div>
 
@@ -416,7 +416,7 @@
               <span>Roční kontrola kotle:</span>
               <span id="val-gas-service" class="text-amber-400 font-bold">1 500 Kč/rok</span>
             </div>
-            <input type="range" id="input-gas-service" min="0" max="3500" step="100" value="1500" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-gas-service" min="0" max="3500" step="100" value="1500" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Předpokládané náklady servisu a kontrol podle vašeho zařízení</div>
           </div>
 
@@ -425,7 +425,7 @@
               <span>Účinnost plynového kotle:</span>
               <span id="val-gas-eff" class="text-sky-400 font-bold">94 %</span>
             </div>
-            <input type="range" id="input-gas-eff" min="85" max="98" step="1" value="94" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-gas-eff" min="85" max="98" step="1" value="94" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div class="text-[10px] text-slate-400">Kondenzace v nízkoteplotním podlahovém vytápění (Hs)</div>
           </div>
         </div>
@@ -442,7 +442,7 @@
               <span>Cena povolenky (EU ETS 2):</span>
               <span id="val-co2-price" class="text-rose-400 font-bold">30 €/t CO₂</span>
             </div>
-            <input type="range" id="input-co2-price" min="0" max="150" step="5" value="30" oninput="onParamChange()" class="w-full mt-1">
+            <input type="range" id="input-co2-price" min="0" max="150" step="5" value="30" onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()" class="w-full mt-1">
             <div id="calc-ets2-surcharge" class="text-[10px] text-rose-300">Příplatek k plynu: +0,33 Kč/kWh (celkem 1,93 Kč/kWh s DPH)</div>
           </div>
 </div>
@@ -2019,7 +2019,7 @@
       return seasons;
     }
 
-    function onAltitudeSliderChange() {
+    function onAltitudeSliderChange(defer = false) {
       state.altitude = parseInt(document.getElementById('input-altitude').value);
       if (state.altitude < 300) state.tExtDesign = -12.0;
       else if (state.altitude <= 600) state.tExtDesign = -15.0;
@@ -2027,7 +2027,7 @@
 
       document.getElementById('badge-altitude').innerText = `⛰️ ${state.altitude} m n. m.`;
       document.getElementById('badge-te-design').innerText = `Výpočtová teplota t_e: ${state.tExtDesign.toFixed(0)} °C`;
-      onParamChange();
+      if (defer) queueParamChange(); else onParamChange();
     }
 
     // System Type Switcher (Floor 35 °C vs Radiators 55 °C)
@@ -4653,6 +4653,40 @@ recalculateSimulation=function(){
 };
 const originalWeatherV3=rawWeather;
 const originalOnParamChangeV3=onParamChange;
+let pendingParamTimer=null;
+let pendingParamChange=false;
+let paramDragActive=false;
+function setParamCalculationStatus(pending){
+  const el=document.getElementById('simulation-calculation-status');
+  if(el)el.textContent=pending?'Probíhá změna nastavení, výsledky čekají na přepočet.':'';
+}
+function queueParamChange(){
+  // Keep the slider's state and labels responsive without rebuilding ten seasons
+  // for every intermediate position.
+  const savedRecalc=recalculateSimulation,savedUpdate=updateUI;
+  recalculateSimulation=()=>{};updateUI=()=>{};
+  try{originalOnParamChangeV3();}finally{recalculateSimulation=savedRecalc;updateUI=savedUpdate;}
+  setParamCalculationStatus(true);
+  pendingParamChange=true;
+  clearTimeout(pendingParamTimer);
+  pendingParamTimer=paramDragActive?null:setTimeout(flushQueuedParamChange,200);
+}
+function beginSliderDrag(){
+  paramDragActive=true;
+  clearTimeout(pendingParamTimer);
+  pendingParamTimer=null;
+}
+function endSliderDrag(){
+  paramDragActive=false;
+  flushQueuedParamChange();
+}
+window.addEventListener('pointerup',()=>{if(paramDragActive)endSliderDrag();});
+window.addEventListener('pointercancel',()=>{if(paramDragActive)endSliderDrag();});
+function flushQueuedParamChange(){
+  if(!pendingParamChange||paramDragActive)return;
+  clearTimeout(pendingParamTimer);pendingParamTimer=null;pendingParamChange=false;
+  try{onParamChange();}finally{setParamCalculationStatus(false);}
+}
 onParamChange=function(){
   const currentKey=getPhysicalSimulationKey();
   const physSame=lastSimPhysicalKey!==''&&currentKey===lastSimPhysicalKey&&Object.keys(simResults||{}).length>0;
@@ -7575,9 +7609,10 @@ function setupWorkspace(){
  const root=document.createElement('section');root.id='configuration-workspace';root.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="workspace-heading">
    <div>
-     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.2</span>
+     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.6</span>
      <h1>Tepelné čerpadlo nebo plyn?</h1>
-     <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se okamžitě přepočítávají vpravo.</p>
+     <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se přepočítají po změně nastavení.</p>
+     <p id="simulation-calculation-status" role="status" aria-live="polite" class="config-note"></p>
    </div>
    <div class="workspace-heading-actions">
      <div class="mode-switch" role="group" aria-label="Režim zobrazení konfigurace a výsledků">
@@ -8192,8 +8227,8 @@ if(selectGeoBeforeWorkspace){
 }
 const altSliderBeforeWorkspace=typeof onAltitudeSliderChange==='function'?onAltitudeSliderChange:null;
 if(altSliderBeforeWorkspace){
- onAltitudeSliderChange=function(){
-  altSliderBeforeWorkspace();
+ onAltitudeSliderChange=function(defer=false){
+  altSliderBeforeWorkspace(defer);
   syncAltitudeDisplay();
  };
 }

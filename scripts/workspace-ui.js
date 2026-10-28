@@ -26,9 +26,10 @@ function setupWorkspace(){
  const root=document.createElement('section');root.id='configuration-workspace';root.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="workspace-heading">
    <div>
-     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.2</span>
+     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.6</span>
      <h1>Tepelné čerpadlo nebo plyn?</h1>
-     <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se okamžitě přepočítávají vpravo.</p>
+     <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se přepočítají po změně nastavení.</p>
+     <p id="simulation-calculation-status" role="status" aria-live="polite" class="config-note"></p>
    </div>
    <div class="workspace-heading-actions">
      <div class="mode-switch" role="group" aria-label="Režim zobrazení konfigurace a výsledků">
@@ -643,8 +644,8 @@ if(selectGeoBeforeWorkspace){
 }
 const altSliderBeforeWorkspace=typeof onAltitudeSliderChange==='function'?onAltitudeSliderChange:null;
 if(altSliderBeforeWorkspace){
- onAltitudeSliderChange=function(){
-  altSliderBeforeWorkspace();
+ onAltitudeSliderChange=function(defer=false){
+  altSliderBeforeWorkspace(defer);
   syncAltitudeDisplay();
  };
 }

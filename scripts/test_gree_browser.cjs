@@ -104,6 +104,21 @@ server.listen(PORT, async () => {
       returnByValue: true
     });
     console.log('Gree options in select:', selectCheck.result.value);
+    const sliderCheck=await send('Runtime.evaluate',{
+      expression:`(() => {
+        const slider=document.getElementById('input-qloss');
+        slider.value='7';
+        slider.dispatchEvent(new Event('input',{bubbles:true}));
+        const pending=document.getElementById('simulation-calculation-status').textContent;
+        const label=document.getElementById('val-qloss').innerText;
+        slider.dispatchEvent(new Event('change',{bubbles:true}));
+        return {pending,label,stateValue:state.qLossDesign,status:document.getElementById('simulation-calculation-status').textContent};
+      })()`,returnByValue:true
+    });
+    if(sliderCheck.exceptionDetails)throw new Error(sliderCheck.exceptionDetails.exception?.description);
+    const slider=sliderCheck.result.value;
+    if(!slider.pending.includes('čekají')||slider.label!=='7.00 kW'||slider.stateValue!==7||slider.status!=='')throw Error('Slider update failed: '+JSON.stringify(slider));
+    console.log('Slider input and final recalculation verified');
 
     // Switch to gree-versati-8 and recalculate
     const switchTest = await send('Runtime.evaluate', {
@@ -155,6 +170,35 @@ server.listen(PORT, async () => {
       throw new Error('Gree heat pumps did not properly reflect in report');
     }
 
+    const allSliders=await send('Runtime.evaluate',{
+      expression:`(async()=>{
+        const realSim=recalculateSimulation,realEco=recalculateEconomy,realUI=updateUI;
+        let calls=0;
+        recalculateSimulation=()=>calls++;recalculateEconomy=()=>calls++;updateUI=()=>{};
+        try {
+          const controls=[...document.querySelectorAll('input[type=range]')].filter(e=>e.id!=='diurnalDaySlider');
+          const errors=[];
+          for(const el of controls){
+            const old=Number(el.value),step=Number(el.step)||1,min=Number(el.min),max=Number(el.max);
+            const next=old+step<=max?old+step:Math.max(min,old-step),before=calls;
+            el.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:1}));
+            el.value=String(next);el.dispatchEvent(new Event('input',{bubbles:true}));
+            await new Promise(r=>setTimeout(r,230));
+            if(calls!==before)errors.push(el.id+': recalculated while held');
+            const numeric=document.getElementById(el.id+'-number');
+            if(numeric&&Number(numeric.value)!==Number(el.value))errors.push(el.id+': numeric value not synchronized');
+            if(el.id==='input-altitude'&&state.altitude!==Number(el.value))errors.push(el.id+': altitude state not synchronized');
+            el.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:1}));
+            el.dispatchEvent(new Event('change',{bubbles:true}));
+            if(calls!==before+1)errors.push(el.id+': expected one calculation on release, got '+(calls-before));
+          }
+          return {count:controls.length,errors,daySlider:!!document.getElementById('diurnalDaySlider')};
+        } finally {recalculateSimulation=realSim;recalculateEconomy=realEco;updateUI=realUI;}
+      })()`,awaitPromise:true,returnByValue:true
+    });
+    if(allSliders.exceptionDetails)throw new Error(allSliders.exceptionDetails.exception?.description);
+    if(allSliders.result.value.errors.length||allSliders.result.value.count!==15||!allSliders.result.value.daySlider)throw new Error('Slider audit failed: '+JSON.stringify(allSliders.result.value));
+    console.log('All 15 parameter sliders: no calculation while held, one on release, numeric controls synchronized.');
     console.log('ALL GREE TESTS PASSED IN BROWSER!');
     ws.close();
     cleanup();

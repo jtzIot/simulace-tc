@@ -2118,7 +2118,7 @@ html_template = r"""<!DOCTYPE html>
       return seasons;
     }
 
-    function onAltitudeSliderChange() {
+    function onAltitudeSliderChange(defer = false) {
       state.altitude = parseInt(document.getElementById('input-altitude').value);
       if (state.altitude < 300) state.tExtDesign = -12.0;
       else if (state.altitude <= 600) state.tExtDesign = -15.0;
@@ -2126,7 +2126,7 @@ html_template = r"""<!DOCTYPE html>
 
       document.getElementById('badge-altitude').innerText = `⛰️ ${state.altitude} m n. m.`;
       document.getElementById('badge-te-design').innerText = `Výpočtová teplota t_e: ${state.tExtDesign.toFixed(0)} °C`;
-      onParamChange();
+      if (defer) queueParamChange(); else onParamChange();
     }
 
     // System Type Switcher (Floor 35 °C vs Radiators 55 °C)
@@ -4398,6 +4398,8 @@ __WORKSPACE_UI__
 """
 
 # Inline the maintained model and UI modules so index.html remains offline-capable.
+html_template = html_template.replace('oninput="onParamChange()"', 'onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="queueParamChange()" onchange="flushQueuedParamChange()"')
+html_template = html_template.replace('oninput="onAltitudeSliderChange()"', 'onpointerdown="beginSliderDrag()" onpointerup="endSliderDrag()" onpointercancel="endSliderDrag()" oninput="onAltitudeSliderChange(true)" onchange="flushQueuedParamChange()"')
 for marker, filename in [('__MODEL_V3__', 'model-v3.js'), ('__REVIEW_V3__', 'review-ui-v3.js'), ('__ENERGY_PRICES__', 'energy-prices.js'), ('__TARIFF_CONTROL__', 'tariff-control.js'), ('__KEYMARK_CATALOG__', 'keymark-catalog-data.js'), ('__HP_KEYMARK__', 'hp-keymark.js'), ('__GREE_CURVES__', 'gree-curves-data.js'), ('__MANUFACTURER_CURVES__', 'manufacturer-curves.js'), ('__WORKSPACE_UI__', 'workspace-ui.js')]:
     with open(os.path.join(os.path.dirname(__file__), filename), encoding='utf-8') as module:
         html_template = html_template.replace(marker, module.read())

@@ -196,6 +196,40 @@ recalculateSimulation=function(){
 };
 const originalWeatherV3=rawWeather;
 const originalOnParamChangeV3=onParamChange;
+let pendingParamTimer=null;
+let pendingParamChange=false;
+let paramDragActive=false;
+function setParamCalculationStatus(pending){
+  const el=document.getElementById('simulation-calculation-status');
+  if(el)el.textContent=pending?'Probíhá změna nastavení, výsledky čekají na přepočet.':'';
+}
+function queueParamChange(){
+  // Keep the slider's state and labels responsive without rebuilding ten seasons
+  // for every intermediate position.
+  const savedRecalc=recalculateSimulation,savedUpdate=updateUI;
+  recalculateSimulation=()=>{};updateUI=()=>{};
+  try{originalOnParamChangeV3();}finally{recalculateSimulation=savedRecalc;updateUI=savedUpdate;}
+  setParamCalculationStatus(true);
+  pendingParamChange=true;
+  clearTimeout(pendingParamTimer);
+  pendingParamTimer=paramDragActive?null:setTimeout(flushQueuedParamChange,200);
+}
+function beginSliderDrag(){
+  paramDragActive=true;
+  clearTimeout(pendingParamTimer);
+  pendingParamTimer=null;
+}
+function endSliderDrag(){
+  paramDragActive=false;
+  flushQueuedParamChange();
+}
+window.addEventListener('pointerup',()=>{if(paramDragActive)endSliderDrag();});
+window.addEventListener('pointercancel',()=>{if(paramDragActive)endSliderDrag();});
+function flushQueuedParamChange(){
+  if(!pendingParamChange||paramDragActive)return;
+  clearTimeout(pendingParamTimer);pendingParamTimer=null;pendingParamChange=false;
+  try{onParamChange();}finally{setParamCalculationStatus(false);}
+}
 onParamChange=function(){
   const currentKey=getPhysicalSimulationKey();
   const physSame=lastSimPhysicalKey!==''&&currentKey===lastSimPhysicalKey&&Object.keys(simResults||{}).length>0;

@@ -1,0 +1,33 @@
+const fs=require('fs'),assert=require('node:assert/strict');
+const html=fs.readFileSync(require('path').join(__dirname,'../index.html'),'utf8');
+const app=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('let rawWeather'));
+const values={'input-qloss':5.8,'input-tflow':28,'input-area':170,'input-thickness':50,'input-tin':22,'input-tolerance':1,'input-price':6,'input-dhw-liters':120,'input-dhw-temp':55,'input-hp-service':0,'input-gas-price':1.6,'input-co2-price':30,'input-gas-service':1500,'input-gas-eff':94};
+const elements=Object.fromEntries(Object.entries(values).map(([id,value])=>[id,{value:String(value),checked:true}]));
+const document={getElementById(id){return elements[id]??(elements[id]={innerText:'',textContent:''});}};
+const run=new Function('window','document',app+'\nreturn code=>eval(code)')({addEventListener(){}},document);
+run('recalculateSimulation=()=>{state.testRecalculations=(state.testRecalculations||0)+1};updateUI=()=>{state.testUpdates=(state.testUpdates||0)+1}');
+async function main(){
+run('beginSliderDrag()');
+elements['input-qloss'].value='6.5';run('queueParamChange()');
+assert.equal(run('state.qLossDesign'),6.5);
+assert.equal(elements['val-qloss'].innerText,'6.50 kW');
+assert.match(elements['simulation-calculation-status'].textContent,/čekají/);
+elements['input-qloss'].value='7.0';run('queueParamChange()');
+await new Promise(resolve=>setTimeout(resolve,300));
+assert.equal(run('state.testRecalculations||0'),0);
+run('flushQueuedParamChange()');
+assert.equal(run('state.testRecalculations||0'),0,'dragging must never trigger recalculation');
+run('endSliderDrag()');
+assert.equal(run('state.testRecalculations'),1);
+assert.equal(run('state.testUpdates'),1);
+assert.equal(run('state.qLossDesign'),7);
+assert.equal(elements['simulation-calculation-status'].textContent,'');
+run('flushQueuedParamChange()');
+assert.equal(run('state.testRecalculations'),1);
+assert.ok(html.includes('oninput="onAltitudeSliderChange(true)" onchange="flushQueuedParamChange()"'));
+elements['input-qloss'].value='7.5';run('queueParamChange()');
+await new Promise(resolve=>setTimeout(resolve,250));
+assert.equal(run('state.testRecalculations'),2,'keyboard input is eventually calculated');
+console.log('PASS: no recalculation while held; release calculates once; keyboard updates are calculated.');
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

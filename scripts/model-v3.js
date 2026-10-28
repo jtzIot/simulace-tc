@@ -18,7 +18,7 @@ function simulateController(weather, level) {
   const hours=[];
   for(let i=-168;i<temps.length;i++){
     const ix=i<0?(i+168)%Math.min(168,temps.length):i,h=ix%24,te=temps[ix],rh=weather.rh[ix];
-    const gains=weather.sol[ix]+0.3,cap=Math.max(0,getCapForActiveModel(te)),minMod=Math.min(cap,state.activeHp.minMod||2.5);
+    const gains=weather.sol[ix]+0.3,cap=Math.max(0,getCapForActiveModel(te)),curveMin=typeof manufacturerPoint==='function'?manufacturerPoint(state.activeModelId,te,state.tFlowDesign)?.min:null,minMod=Math.min(cap,curveMin??state.activeHp.minMod??2.5);
     let qHour=0,eHour=0,bkHour=0,waterHour=0,runHour=false,dhwQ=0,dhwE=0,dhwB=0,dhwMissing=0,ntE=0,vtE=0,ntMinutes=0,targetSum=0,chargeSteps=0;
     if(i===0)initialEnergy=Cf*tf+Cr*tr;
     for(let step=0;step<6;step++){
@@ -47,7 +47,7 @@ function simulateController(weather, level) {
       const covering=state.floorCovering==='drevo'?2.5:state.floorCovering==='vinyl'?1:0;
       const curve=state.tInTarget+(state.tFlowDesign-state.tInTarget)*Math.pow(load,0.9)+covering*load;
       const water=bounded(Math.max(curve,radiator?curve:tf+2+hp/(2.5*area)),22,55);
-      if(state.activeHp.km){const actualCap=getCapForActiveModel(te,water)*(1-share);hp=Math.min(hp,actualCap);if(tr<low&&auxAllowed&&request>actualCap)bk=Math.min(3-dhwBk,request-actualCap);}
+      if(state.activeHp.km||(typeof manufacturerCurves!=='undefined'&&manufacturerCurves[state.activeModelId])){const actualCap=getCapForActiveModel(te,water)*(1-share);hp=Math.min(hp,actualCap);if(tr<low&&auxAllowed&&request>actualCap)bk=Math.min(3-dhwBk,request-actualCap);}
       const nowRunning=hp>0||dhwHp>0;if(i>=0&&nowRunning&&!running)starts++;running=nowRunning;runHour||=nowRunning;
       const el=hp/getCopForActiveModel(te,water,rh,hp)+bk+(hp+bk>0?kmExternalPumpPower():0)+(nowRunning?0:kmIdlePower(!compressorAllowed));
       const dhwEl=dhwHp/getCopDhwForActiveModel(te,state.dhwTargetTemp+3,rh)+dhwBk;

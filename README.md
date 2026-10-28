@@ -1,5 +1,15 @@
 # Simulace vytápění TČ a plynem — v3
 
+## Modely Gawliczek a výkonové tabulky
+
+Výběr obsahuje pět samostatných modelů R290 Power World 6, 8,9, 11,4, 14,8 a 18,2 kW, pro které jsou k dispozici certifikáty KEYMARK i výkonové tabulky do −25 °C. Dřívější scénáře s jinými modely nelze importovat bez změny modelu.
+
+K nim jsou přidány Gree Versati V 8 a 10 kW; tabulky výkonu a příkonu byly převzaty z dodaného manuálu, PDF strany 13–14. Mezi platnými body se interpoluje; chybějící kombinace venkovní a vodní teploty nejsou extrapolovány a čerpadlo pro ně nemá výkon. Pro vodu pod 25 °C se používá nejbližší tabulková teplota 25 °C. Tabulky pro Gree jsou v `scripts/gree-curves-data.js`.
+
+Simulace používá tabulky minimálního a maximálního výkonu a příkonu pro venkovní teploty −25 až +21 °C a teploty vody 35, 45 a 55 °C. Mezi body interpoluje teplo a příkon; pro vodu mimo tento rozsah používá nejbližší tabulkovou hodnotu, pod −25 °C kompresor vypíná. TUV je odhad z topné mapy. Křivky a jejich zdroje jsou v `scripts/manufacturer-curves.js`. Pro 11,4 kW je přiřazen certifikát třífázového PW040-DKZLRS-E, který odpovídá výkonové tabulce.
+
+Ověření: `node scripts/test_manufacturer_curves.cjs`, `node scripts/test_catalog.cjs`, `node scripts/test_model_v3.cjs`.
+
 Interaktivní simulace modelového rodinného domu na historických topných sezónách Open-Meteo ERA5 (říjen–duben, pro Ostravu 1960–2026). Grafy a ekonomické přehledy zobrazují vybrané desetileté okno (výchozích nejnovějších 10 sezón 2016–2026) a modelový rok.
 
 ## Spuštění a sestavení

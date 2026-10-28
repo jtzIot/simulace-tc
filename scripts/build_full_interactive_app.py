@@ -1522,7 +1522,7 @@ html_template = r"""<!DOCTYPE html>
       },
       {
         id: 'gawliczek-pw-114',
-        name: 'Gawliczek / Power World 11,4 kW R290 · PW040-DKZLRS-E/S',
+        name: 'Gawliczek / Power World 11,4 kW R290 · PW040-DKZLRS-E',
         brand: 'Gawliczek / Power World',
         modelCode: 'PW040-DKZLRS-E/S',
         certNo: '041-K032-08 / 02',
@@ -2444,7 +2444,7 @@ __MODEL_V3__
       setFloorMaterial('beton');
       setFloorCovering('vinyl');
       setDhwMode('smart');
-      selectKeymarkModel('warmhouse-hm-m0-a1-keymark1325');
+      selectKeymarkModel('gawliczek-pw-89');
       setCenterYear(2022);
       onParamChange();
     }
@@ -3904,7 +3904,7 @@ __MODEL_V3__
 
     function selectKeymarkModel(id) {
       const found = keymarkDatabase.find(x => x.id === id);
-      if (found) {
+      if (found && found.selectable === true) {
         state.activeHp = found;
         state.activeModelId = found.id;
         document.getElementById('badge-keymark').innerText = `Keymark: ${found.certNo} (${(state.heatingSystem === 'radiator' ? (found.pDesign55 || 7.5) : (found.pDesign35 || 8.1))} kW)`;
@@ -4060,11 +4060,11 @@ __MODEL_V3__
             <div class="grid grid-cols-3 gap-1.5 text-center">
               <div class="bg-slate-950 p-1.5 rounded">
                 <div class="text-[10px] text-slate-400">Podlaha 35°C</div>
-                <div class="text-xs font-bold text-emerald-400">SCOP ${item.scop35}</div>
+                <div class="text-xs font-bold text-emerald-400">SCOP ${item.scop35 ?? '—'}</div>
               </div>
               <div class="bg-slate-950 p-1.5 rounded">
                 <div class="text-[10px] text-slate-400">Radiátory 55°C</div>
-                <div class="text-xs font-bold text-sky-400">SCOP ${item.scop55}</div>
+                <div class="text-xs font-bold text-sky-400">SCOP ${item.scop55 ?? '—'}</div>
               </div>
               <div class="bg-slate-950 p-1.5 rounded">
                 <div class="text-[10px] text-slate-400">TUV COP</div>
@@ -4388,6 +4388,8 @@ __ENERGY_PRICES__
 __TARIFF_CONTROL__
 __KEYMARK_CATALOG__
 __HP_KEYMARK__
+__GREE_CURVES__
+__MANUFACTURER_CURVES__
 __WORKSPACE_UI__
     window.onload = init;
   </script>
@@ -4396,7 +4398,7 @@ __WORKSPACE_UI__
 """
 
 # Inline the maintained model and UI modules so index.html remains offline-capable.
-for marker, filename in [('__MODEL_V3__', 'model-v3.js'), ('__REVIEW_V3__', 'review-ui-v3.js'), ('__ENERGY_PRICES__', 'energy-prices.js'), ('__TARIFF_CONTROL__', 'tariff-control.js'), ('__KEYMARK_CATALOG__', 'keymark-catalog-data.js'), ('__HP_KEYMARK__', 'hp-keymark.js'), ('__WORKSPACE_UI__', 'workspace-ui.js')]:
+for marker, filename in [('__MODEL_V3__', 'model-v3.js'), ('__REVIEW_V3__', 'review-ui-v3.js'), ('__ENERGY_PRICES__', 'energy-prices.js'), ('__TARIFF_CONTROL__', 'tariff-control.js'), ('__KEYMARK_CATALOG__', 'keymark-catalog-data.js'), ('__HP_KEYMARK__', 'hp-keymark.js'), ('__GREE_CURVES__', 'gree-curves-data.js'), ('__MANUFACTURER_CURVES__', 'manufacturer-curves.js'), ('__WORKSPACE_UI__', 'workspace-ui.js')]:
     with open(os.path.join(os.path.dirname(__file__), filename), encoding='utf-8') as module:
         html_template = html_template.replace(marker, module.read())
 

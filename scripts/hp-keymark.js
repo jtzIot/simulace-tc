@@ -76,7 +76,7 @@ renderSettingsHeatPump=function(){
  const badge=document.getElementById('badge-keymark');if(badge)badge.textContent=state.activeHp.km?'Keymark: '+state.activeHp.certNo+' · '+state.activeHp.modelCode:'Původní neověřený katalog: '+state.activeHp.modelCode;
  if(!state.activeHp.km){settingsBeforeKeymark();const box=document.getElementById('settings-hp-parameters');if(box)box.insertAdjacentHTML('afterbegin','<p class="km-warning">Tento původní katalogový záznam nemá v aplikaci ověřenou úplnou sadu měření. Ověřené a neověřené části jsou uvedené zvlášť.</p>');return;}
  const select=document.getElementById('settings-hp-select'),box=document.getElementById('settings-hp-parameters');if(!select||!box)return;
- select.innerHTML=keymarkDatabase.filter(h=>h.selectable!==false).map(h=>`<option value="${esc(h.id)}">${h.km?'Ověřený zdroj · ':'Původní odhad · '}${esc(h.name)}</option>`).join('');select.value=state.activeModelId;
+ select.innerHTML=keymarkDatabase.filter(h=>h.selectable!==false).map(h=>`<option value="${esc(h.id)}">${h.km||h.incompleteKeymark?'Ověřený zdroj · ':'Původní odhad · '}${esc(h.name)}</option>`).join('');select.value=state.activeModelId;
  const hp=state.activeHp,k=hp.km;
  const edit=(group,key,value)=>`<input aria-label="${group} ${key}" type="number" step="0.01" value="${value==null?'':Number(value.toFixed(2))}" onchange="editKmScalar('${group}','${key}',this.value)">`;
  const pointEdit=(group,index,key,value)=>`<input aria-label="${group} ${k[group].points[index].air} ${key}" type="number" step="0.01" value="${value==null?'':Number(value.toFixed(2))}" onchange="editKmPoint('${group}',${index},'${key}',this.value)">`;
@@ -122,6 +122,14 @@ Object.assign(measuredModel1325,{copA7W35:4.71,copA7W55:3.02,copA2W35:kmFullLoad
 function keymarkOriginal(x){return [keymark1325,...additionalKeymarkData].find(k=>k.cert===x?.cert&&k.model===x?.model);}
 keymark1325.source=keymark1325Source;keymark1325.climate='Average Climate';keymark1325.refrigerant='R290';
 measuredModel1325.km=kmClone(keymark1325);
+// The seller's PW040 performance table is for the three-phase E model.
+// Replace the formerly paired E/S certificate with the matching E certificate.
+const pw040=additionalKeymarkData.find(k=>k.id==='gawliczek-pw-114');
+Object.assign(pw040,{model:'PW040-DKZLRS-E',cert:'041-K032-12 / 02',refrigerantKg:1.1,soundPower:58,source:'https://www.heatpumpkeymark.com/en/nc/ps-keymark/certificate-holders/?cHash=bcb0aa9a78dc1f8ce4e12a254fd53735&tx_pskeymark_frontend%5Baction%5D=showSubtype&tx_pskeymark_frontend%5Bcontroller%5D=Frontend&tx_pskeymark_frontend%5Bsubtype%5D=5403'});
+for(const [group,values,points] of [
+ ['lt',{ratedHeat:8.11,ratedInput:1.66,ratedCop:4.87,prated:7.61,scop:4.62,eta:182,poff:6,pto:22,psb:6,pck:35,psup:.24,qhe:3404},[[7.37,2.67],[6.73,3.07],[4.12,4.57],[4.22,6.18],[5.05,8.27]]],
+ ['mt',{ratedHeat:8.08,ratedInput:2.67,ratedCop:3.02,prated:8.10,scop:3.47,eta:136,poff:6,pto:22,psb:6,pck:35,psup:1.08,qhe:4821},[[7.01,2.06],[7.16,2.29],[4.57,3.39],[4.06,4.66],[4.95,6.49]]]
+]) {Object.assign(pw040[group],values); pw040[group].points.forEach((p,i)=>Object.assign(p,{heat:points[i][0],cop:points[i][1],cdh:.9}));}
 for(const k of additionalKeymarkData){
  const hp=keymarkDatabase.find(h=>h.id===k.id);if(!hp)continue;
  const displayName=(hp.id.startsWith('gawliczek')||hp.id.startsWith('gree'))?hp.name:(hp.brand.split(' ')[0]+' '+k.model);

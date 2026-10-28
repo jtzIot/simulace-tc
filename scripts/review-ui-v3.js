@@ -39,7 +39,7 @@ function applyScenario(payload) {
   }
   if (typeof x.gasBoilerModel === 'string') next.gasBoilerModel = x.gasBoilerModel.slice(0, 120);
   const hp = keymarkDatabase.find(h => h.id === x.activeModelId);
-  if (!hp) throw Error('Model není v místním katalogu.');
+  if (!hp || hp.selectable===false) throw Error('Model již není v nabídce; před importem vyberte podporované čerpadlo.');
   if (x.isCustomWeatherLoaded) {
     const w = payload.weather;
     if (!w || Object.keys(w).length > 80 || !Object.keys(w).length) throw Error('Chybí archiv počasí.');

@@ -8,8 +8,8 @@ const configurationTabs=[
   ['control','6. Režimy řízení']
 ];
 let workspaceMounted=false;
-let uiMode='simple';
-let activeConfigTab='house';
+let uiMode='advanced';
+let activeConfigTab='location';
 let analysisExpanded=false;
 let simpleSlotMoves=[];
 
@@ -26,14 +26,14 @@ function setupWorkspace(){
  const root=document.createElement('section');root.id='configuration-workspace';root.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="workspace-heading">
    <div>
-     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.27.11</span>
+     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.1</span>
      <h1>Tepelné čerpadlo nebo plyn?</h1>
-     <p id="workspace-mode-desc">Zjednodušený režim: zadejte jen klíčové parametry lokality, domu a zdroje tepla. Výsledné náklady vidíte okamžitě vpravo.</p>
+     <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se okamžitě přepočítávají vpravo.</p>
    </div>
    <div class="workspace-heading-actions">
      <div class="mode-switch" role="group" aria-label="Režim zobrazení konfigurace a výsledků">
-       <button type="button" id="btn-mode-simple" class="mode-btn active" aria-pressed="true" onclick="setUiMode('simple')">⚡ Zjednodušený režim</button>
-       <button type="button" id="btn-mode-advanced" class="mode-btn" aria-pressed="false" onclick="setUiMode('advanced')">🔧 Podrobný režim</button>
+       <button type="button" id="btn-mode-simple" class="mode-btn" aria-pressed="false" onclick="setUiMode('simple')">⚡ Zjednodušený režim</button>
+       <button type="button" id="btn-mode-advanced" class="mode-btn active" aria-pressed="true" onclick="setUiMode('advanced')">🔧 Podrobný režim</button>
      </div>
      <button id="theme-toggle" class="workspace-button" onclick="toggleTheme()">Denní téma</button>
      <button class="workspace-button" onclick="resetDefaultParameters()">Obnovit výchozí nastavení</button>
@@ -41,7 +41,7 @@ function setupWorkspace(){
  </div>
  <div class="workspace-grid">
    <div class="configuration-shell">
-     <nav id="config-tabs-nav" class="configuration-tabs" role="tablist" aria-label="Nastavení simulace" hidden>${configurationTabs.map(([id,label])=>`<button id="tab-${id}" role="tab" aria-controls="panel-${id}" aria-selected="${id==='house'}" tabindex="${id==='house'?0:-1}" onclick="selectConfigTab('${id}')">${label}</button>`).join('')}</nav>
+     <nav id="config-tabs-nav" class="configuration-tabs" role="tablist" aria-label="Nastavení simulace">${configurationTabs.map(([id,label])=>`<button id="tab-${id}" role="tab" aria-controls="panel-${id}" aria-selected="${id===activeConfigTab}" tabindex="${id===activeConfigTab?0:-1}" onclick="selectConfigTab('${id}')">${label}</button>`).join('')}</nav>
      <section id="panel-simple" role="region" aria-label="Zjednodušená konfigurace">
        <div class="panel-header simple-panel-header">
          <div>
@@ -777,6 +777,7 @@ function buildReportData(){
    appliances:householdApplianceNames()
   },
   heatPump:{
+   incompleteKeymark:!!activeHp.incompleteKeymark,
    name:activeHp.name||'Warmhouse HM-M0-A1',
    modelCode:activeHp.modelCode||km?.model||'HM-M0-A1',
    brand:activeHp.brand||(km?.holder?km.holder.split(' ')[0]:'Gawliczek / Warmhouse'),
@@ -1019,10 +1020,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial
           <dt>Kompresor</dt><dd>${esc(d.heatPump.compressor)}</dd>
           <dt>Chladivo a náplň</dt><dd>${esc(d.heatPump.refrigerant)}${d.heatPump.refrigerantKg ? ' (náplň ' + d.heatPump.refrigerantKg + ')' : ''}</dd>
           ${d.heatPump.noiseDb ? `<dt>Akustický výkon L_WA (hlučnost)</dt><dd>${esc(d.heatPump.noiseDb)}</dd>` : ''}
-          ${d.heatPump.minMod ? `<dt>Minimální modulace výkonu</dt><dd>${d.heatPump.minMod}</dd>` : ''}
-          <dt>Výkon a SCOP (podlaha W35)</dt><dd>Pdesignh <b>${nfmt(d.heatPump.pDesign35, 1)} kW</b> · SCOP <b>${nfmt(d.heatPump.scop35, 2)}</b> (η_s ${d.heatPump.eta35} %, ${d.heatPump.energyClass35})</dd>
+          ${d.heatPump.minMod && !d.heatPump.incompleteKeymark ? `<dt>Minimální modulace výkonu</dt><dd>${d.heatPump.minMod}</dd>` : ''}
+          ${d.heatPump.incompleteKeymark ? '<dt>Normové sezónní údaje</dt><dd>Nejsou načteny; výpočet používá výkonovou tabulku výrobce.</dd>' : `<dt>Výkon a SCOP (podlaha W35)</dt><dd>Pdesignh <b>${nfmt(d.heatPump.pDesign35, 1)} kW</b> · SCOP <b>${nfmt(d.heatPump.scop35, 2)}</b> (η_s ${d.heatPump.eta35} %, ${d.heatPump.energyClass35})</dd>
           <dt>Výkon a SCOP (radiátory W55)</dt><dd>Pdesignh <b>${nfmt(d.heatPump.pDesign55, 1)} kW</b> · SCOP <b>${nfmt(d.heatPump.scop55, 2)}</b> (η_s ${d.heatPump.eta55} %, ${d.heatPump.energyClass55})</dd>
-          <dt>Teplotní limity (T_biv / T_OL / WTOL)</dt><dd>T_biv ${d.heatPump.tbiv} °C · T_OL ${d.heatPump.tol} °C · WTOL ${d.heatPump.wtol} °C</dd>
+          <dt>Teplotní limity (T_biv / T_OL / WTOL)</dt><dd>T_biv ${d.heatPump.tbiv} °C · T_OL ${d.heatPump.tol} °C · WTOL ${d.heatPump.wtol} °C</dd>`}
           ${d.heatPump.standbyW !== null ? `<dt>Pomocný příkon (standby / karter)</dt><dd>standby ${d.heatPump.standbyW} W${d.heatPump.crankcaseW ? ' · karter ' + d.heatPump.crankcaseW + ' W' : ''}${d.heatPump.extPumpW ? ' · čerpadlo ' + d.heatPump.extPumpW + ' W' : ''}</dd>` : ''}
           ${d.heatPump.testPoints && d.heatPump.testPoints.length ? `<dt>Zkušební body EN 14825 (${d.house.isRadiator ? 'W55' : 'W35'})</dt><dd class="hp-points-line">${d.heatPump.testPoints.map(p => `<span>A${p.air > 0 ? '+' : ''}${p.air}: <b>${nfmt(p.heat, 1)} kW</b> (COP ${nfmt(p.cop, 2)})</span>`).join(' · ')}</dd>` : ''}
           <dt>Pravidelný roční servis TČ</dt><dd>${nfmt(d.heatPump.serviceCost, 0)} Kč/rok</dd>

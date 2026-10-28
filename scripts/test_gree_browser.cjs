@@ -125,12 +125,12 @@ server.listen(PORT, async () => {
       })()`,
       returnByValue: true
     });
-    console.log('Switch to Gree 8 kW test:', switchTest.result.value);
+    console.log('Switch to Gree 8 kW test:', switchTest.result.value, switchTest.exceptionDetails?.exception?.description || '');
 
-    // Switch to gree-versati-6 and recalculate
+    // Switch to gree-versati-10 and recalculate
     const switchTest2 = await send('Runtime.evaluate', {
       expression: `(() => {
-        selectKeymarkModel('gree-versati-6');
+        selectKeymarkModel('gree-versati-10');
         const hp = state.activeHp;
         openReportModal();
         const frame = document.getElementById('report-preview-frame');
@@ -142,16 +142,16 @@ server.listen(PORT, async () => {
           certNo: hp.certNo,
           pDesign35: hp.pDesign35,
           scop35: hp.scop35,
-          reportHasGree6: frameText.includes('GRS-CQ6.0Pd/NpG4-E') || frameText.includes('011-1W1085')
+          reportHasGree10: frameText.includes('GRS-CQ10PD/NPG4-E') && frameText.includes('041-K004-34')
         };
       })()`,
       returnByValue: true
     });
-    console.log('Switch to Gree 6 kW test:', switchTest2.result.value);
+    console.log('Switch to Gree 10 kW test:', switchTest2.result.value, switchTest2.exceptionDetails?.exception?.description || '');
 
     const s1 = switchTest.result.value;
     const s2 = switchTest2.result.value;
-    if (!s1.reportHasGree || !s2.reportHasGree6) {
+    if (s1.activeId !== 'gree-versati-8' || s2.activeId !== 'gree-versati-10' || !s1.reportHasGree || !s2.reportHasGree10) {
       throw new Error('Gree heat pumps did not properly reflect in report');
     }
 

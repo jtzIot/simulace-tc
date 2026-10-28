@@ -3,6 +3,8 @@ const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 const app=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('let rawWeather'));
 const run=new Function('window','document',app+'\nreturn code=>eval(code);')({addEventListener(){}},{});
 const near=(a,b,label)=>assert(Math.abs(a-b)<1e-8,label+': '+a+' != '+b);
+// Exercise the legacy KEYMARK helper independently of the selectable catalog.
+run("state.activeModelId='warmhouse-hm-m0-a1-keymark1325';state.activeHp=keymarkDatabase.find(h=>h.id===state.activeModelId)");
 assert.equal(run('state.activeHp.certNo'),'011-1W1325');
 near(run('getCopForActiveModel(12,24,90,2.35)'),8.95,'exact LT +12 point, no double defrost');
 near(run('getCopForActiveModel(12,30,90,2.23)'),6.64,'exact MT +12 point');

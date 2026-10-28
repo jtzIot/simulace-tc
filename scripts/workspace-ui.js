@@ -26,7 +26,7 @@ function setupWorkspace(){
  const root=document.createElement('section');root.id='configuration-workspace';root.dataset.uiMode=uiMode;
  root.innerHTML=`<div class="workspace-heading">
    <div>
-     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.1</span>
+     <span class="eyebrow">SIMULACE VYTÁPĚNÍ RD · VERZE 2026.10.28.2</span>
      <h1>Tepelné čerpadlo nebo plyn?</h1>
      <p id="workspace-mode-desc">Nastavte parametry domu, zdroje tepla a tarifů v 6 krocích. Výsledné náklady a komfort se okamžitě přepočítávají vpravo.</p>
    </div>
@@ -833,6 +833,7 @@ function buildReportData(){
    referenceVt:energyPrices({...state.energy,tariff:state.energy.referenceTariff||'D02d'}).vt
   },
   summary:{
+   economyPeriod:state.economyPeriod,
    seasonsCount:seasons.length,
    seasonsRange:`${seasons[0]} až ${seasons.at(-1)}`,
    includeHousehold,
@@ -880,6 +881,8 @@ function buildReportData(){
 }
 
 function generateReportHtml(d){
+ const meanRow=key=>d.seasonRows.length?d.seasonRows.reduce((sum,row)=>sum+row[key],0)/d.seasonRows.length:0;
+ const averageSaving=meanRow('saving');
  return `<!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -1073,7 +1076,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial
   </div>
 
   <div class="report-table-box">
-    <h2>📊 Víceletá bilance – srovnání 10 historických sezón (Open-Meteo ERA5)</h2>
+    <h2>📊 Víceletá bilance – srovnání ${d.seasonRows.length} historických sezón (Open-Meteo ERA5)</h2>
     <table class="report-table">
       <thead>
         <tr>
@@ -1083,7 +1086,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial
           <th>SCOP</th>
           <th>Náklady TČ</th>
           <th>Náklady Plyn</th>
-          <th>Roční úspora TČ</th>
+          <th>${d.summary.economyPeriod==='season'?'Sezónní':'Roční'} úspora TČ</th>
         </tr>
       </thead>
       <tbody>
@@ -1097,13 +1100,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial
           <td style="font-weight:700;color:${row.saving>=0?'#059669':'#be123c'}">${row.saving>=0?'+':''}${nfmt(row.saving,0)} Kč</td>
         </tr>`).join('')}
         <tr class="avg-row">
-          <td>Průměr (10 sezón)</td>
-          <td>${nfmt(d.summary.heatTotal,0)} kWh</td>
-          <td>${nfmt(d.summary.hpElectricityTotal,0)} kWh</td>
-          <td>${nfmt(d.summary.scopAvg,2)}</td>
-          <td>${nfmt(d.summary.heatingHp,0)} Kč</td>
-          <td>${nfmt(d.summary.heatingGas,0)} Kč</td>
-          <td style="font-weight:800;color:${d.summary.heatingSaving>=0?'#059669':'#be123c'}">${d.summary.heatingSaving>=0?'+':''}${nfmt(d.summary.heatingSaving,0)} Kč</td>
+          <td>Průměr (${d.seasonRows.length} sezón)</td>
+          <td>${nfmt(meanRow('heatKwh'),0)} kWh</td>
+          <td>${nfmt(meanRow('elKwh'),0)} kWh</td>
+          <td>${nfmt(meanRow('scop'),2)}</td>
+          <td>${nfmt(meanRow('costHp'),0)} Kč</td>
+          <td>${nfmt(meanRow('costGas'),0)} Kč</td>
+          <td style="font-weight:800;color:${averageSaving>=0?'#059669':'#be123c'}">${averageSaving>=0?'+':''}${nfmt(averageSaving,0)} Kč</td>
         </tr>
       </tbody>
     </table>

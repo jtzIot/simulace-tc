@@ -3,6 +3,7 @@ const { execFileSync } = require('child_process');
 const tests = [
   'scripts/test_catalog.cjs',
   'scripts/test_manufacturer_curves.cjs',
+  'scripts/test_report_averages.cjs',
   'scripts/test_energy_prices.cjs',
   'scripts/test_audit.cjs',
   'scripts/test_household.cjs',
